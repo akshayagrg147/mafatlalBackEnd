@@ -9,7 +9,7 @@ def home_screen_info(request):
     print(constants.INITAITED_HOME_SCREEN_API)
     
     data = request.query_params
-    user_id = data['user_id']
+    user_id = data['user_id'] if 'user_id' in data else None
     
     status, response_data, message = home_screen_logic(user_id)
     
@@ -21,7 +21,7 @@ def home_sub_category_product_info(request):
     print(constants.INITAITED_SUBCAT_PRODUCT_API)
     
     data = request.query_params
-    sub_cat_id = data['sub_id']
+    sub_cat_id = data['sub_id'] if 'sub_id' in data else None
     
     status, response_data, message = sub_catproduct_info_logic(sub_cat_id)
     

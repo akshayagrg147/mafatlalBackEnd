@@ -9,10 +9,13 @@ import json, ast
 def home_screen_logic(user_id):
     try:
         final_response = {}
+        if not user_id:
+            return 'Error', None, "User_id can't be null"
+        
         user_obj = TblUser.objects.filter(id = user_id).first()
         
         if not user_obj:
-            return False, None, "User not found"
+            return 'Error', None, "User not found"
         
         user_state = user_obj.state
         categories_info = {}
@@ -28,14 +31,14 @@ def home_screen_logic(user_id):
         
         final_response['products'] = products_info
         
-        return True, final_response, "All categories found successfully"
+        return 'Success', final_response, "All categories found successfully"
             
         
     except Exception as e:
         print(constants.BREAKCODE)
         print(f"!!! ERROR !!! Error with the home screen logic :- {str(e)} ##################")
 
-        return False, None, str(e)
+        return 'Error', None, str(e)
     
 def handle_categories(categories):
     final_response = {}
@@ -101,15 +104,15 @@ def product_info_logic(product_id):
             final_response['price']                     = product_obj.price
             final_response['description']               = product_obj.description
             
-        return True, final_response, 'Product data fetched successfully'
+        return 'Success', final_response, 'Product data fetched successfully'
             
     except ValueError as e:
         print(f"Error while extracting th procuct info as {str(e)}")
-        return False, None, str(e)
+        return 'Error', None, str(e)
     
     except Exception as e:
         print(f"Error while extracting th procuct info as {str(e)}")
-        return False, None, str(e)
+        return 'Error', None, str(e)
     
 def sub_catproduct_info_logic(sub_catid):
     try:
@@ -138,12 +141,12 @@ def sub_catproduct_info_logic(sub_catid):
                 
                 final_response.append(response)
             
-        return True, final_response, 'Product data fetched successfully'
+        return 'Success', final_response, 'Product data fetched successfully'
             
     except ValueError as e:
         print(f"Error while extracting th procuct info as {str(e)}")
-        return False, None, str(e)
+        return 'Error', None, str(e)
     
     except Exception as e:
         print(f"Error while extracting th procuct info as {str(e)}")
-        return False, None, str(e)
+        return 'Error', None, str(e)
