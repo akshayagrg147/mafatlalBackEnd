@@ -21,6 +21,10 @@ class TblSubcategories(models.Model):
 class TblProducts(models.Model):
     product_name = models.CharField(max_length=75)
     product_category = models.ForeignKey(TblCategories, models.DO_NOTHING, db_column='product_category', blank=True, null=True)
+    product_sub_category = models.IntegerField(blank=True, null=True)
+    price = models.CharField(max_length=10)
+    description = models.CharField(max_length=250)
+    product_image = models.CharField(max_length=250)
     size_available = models.TextField(blank=True, null=True)  # This field type is a guess.
     created_on = models.DateTimeField()
     created_by = models.CharField(max_length=50, blank=True, null=True)
