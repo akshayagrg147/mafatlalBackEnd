@@ -150,3 +150,22 @@ def sub_catproduct_info_logic(sub_catid):
     except Exception as e:
         print(f"Error while extracting th procuct info as {str(e)}")
         return 'Error', None, str(e)
+    
+def product_info_list_logic(product_ids):
+    try:
+        final_response = []
+        for id in product_ids:
+            status, response_data, message = product_info_logic(id)
+            print(f"Status and message for product id {id} is {status} {message}")
+            if response_data:
+                final_response.append(response_data)
+                
+        return 'Success', final_response, 'Product data list fetched successfully'
+        
+    except ValueError as e:
+        print(f"Error while extracting th procuct info list as {str(e)}")
+        return 'Error', None, str(e)
+    
+    except Exception as e:
+        print(f"Error while extracting th procuct info list as {str(e)}")
+        return 'Error', None, str(e)
