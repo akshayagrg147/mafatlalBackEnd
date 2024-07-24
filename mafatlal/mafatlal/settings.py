@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'login',
-    'home_screen'
+    'home_screen',
+    'order'
 ]
 
 MIDDLEWARE = [
