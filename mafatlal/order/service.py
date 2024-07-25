@@ -2,7 +2,8 @@ from .models import TblOrder
 from login.models import TblUser
 from mafatlal import api_serializer
 from home_screen.service import product_info_logic
-import ast, datetime
+from django.core import serializers as json_serializer
+import ast, datetime, json
 
 
 def order_history_logic(user_id):
@@ -20,21 +21,20 @@ def order_history_logic(user_id):
         
         for order in orders_objs:
             response = {
-                "product_id": order.id,
-                "product_quantity": order.product_quantity,
-                "user_id": order.user_id,
-                "price": order.price,
-                "product_image": order.product_image,
-                "description": order.description,
-                "order_details": order.order_details,
-                "order_status": order.order_status,
-                "delievery_address": order.delievery_address,
-                "delievery_state": order.delievery_state,
-                "delievery_pincode": order.delievery_pincode,
-                "created_on": order.created_on,
-                "created_by": order.created_by,
-                "updated_on": order.updated_on,
-                "updated_by": order.updated_by
+                "order_id"          : order.id,
+                "product_quantity"  : order.product_quantity,
+                "user_id"           : order.user_id,
+                "price"             : order.price,
+                "product_image"     : order.product_image,
+                "description"       : order.description,
+                "order_status"      : order.order_status,
+                "delievery_address" : order.delievery_address,
+                "delievery_state"   : order.delievery_state,
+                "delievery_pincode" : order.delievery_pincode,
+                "created_on"        : order.created_on,
+                "created_by"        : order.created_by,
+                "updated_on"        : order.updated_on,
+                "updated_by"        : order.updated_by
             }
             
             final_response.append(response)
@@ -51,7 +51,6 @@ def order_history_logic(user_id):
 
 def order_place_logic(data):
     try:
-        final_response = []
         serializer = api_serializer.order_place_serializer(data=data)
         serializer.is_valid(raise_exception= True)
             
@@ -65,9 +64,14 @@ def order_place_logic(data):
             }
             products_list.append(product_obj)
         
-        TblOrder.objects.create(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.utcnow(), updated_on = datetime.datetime.utcnow(), created_by = data['user_id'])
+        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'])
         
-        return True, final_response, "Order placed successfully"
+        order_obj.save()
+        order_obj = json_serializer.serialize('json', [order_obj])
+        order_obj = json.loads(order_obj)
+        
+        response_obj = order_obj[0]['fields']
+        return True, response_obj, "Order placed successfully"
         
     except ValueError as ve:
         print(f"Error at order placing api {str(ve)}")
