@@ -21,20 +21,22 @@ def order_history_logic(user_id):
         
         for order in orders_objs:
             response = {
-                "order_id"          : order.id,
-                "product_quantity"  : order.product_quantity,
-                "user_id"           : order.user_id,
-                "price"             : order.price,
-                "product_image"     : order.product_image,
-                "description"       : order.description,
-                "order_status"      : order.order_status,
-                "delievery_address" : order.delievery_address,
-                "delievery_state"   : order.delievery_state,
-                "delievery_pincode" : order.delievery_pincode,
-                "created_on"        : order.created_on,
-                "created_by"        : order.created_by,
-                "updated_on"        : order.updated_on,
-                "updated_by"        : order.updated_by
+                "order_id"              : order.id,
+                "product_quantity"      : order.product_quantity,
+                "user_id"               : order.user_id,
+                "price"                 : order.price,
+                "product_image"         : order.product_image,
+                "description"           : order.description,
+                "order_status"          : order.order_status,
+                "delievery_address"     : order.delievery_address,
+                "delievery_state"       : order.delievery_state,
+                "delievery_district"    : order.delievery_district,
+                "delievery_city"        : order.delievery_city,
+                "delievery_pincode"     : order.delievery_pincode,
+                "created_on"            : order.created_on,
+                "created_by"            : order.created_by,
+                "updated_on"            : order.updated_on,
+                "updated_by"            : order.updated_by
             }
             
             final_response.append(response)
@@ -64,7 +66,7 @@ def order_place_logic(data):
             }
             products_list.append(product_obj)
         
-        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'])
+        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'], delievery_district = data['district'], delievery_city = data['city'])
         
         order_obj.save()
         order_obj = json_serializer.serialize('json', [order_obj])
@@ -118,6 +120,8 @@ def order_details_logic(order_id):
         final_response['order_placed']  = order_object.created_on
         final_response['address']       = order_object.delievery_address
         final_response['state']         = order_object.delievery_state
+        final_response['district']      = order_object.delievery_district
+        final_response['city']          = order_object.delievery_city
         final_response['pincode']       = order_object.delievery_pincode
         
         return True, final_response, "Order placed successfully"
