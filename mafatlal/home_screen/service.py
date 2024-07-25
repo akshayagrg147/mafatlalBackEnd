@@ -23,7 +23,7 @@ def home_screen_logic(user_id):
         all_categories = TblCategories.objects.filter(state = user_state).all()
         
         for categories in all_categories:
-            categories_info[categories.categories_name] = handle_categories(categories)
+            categories_info[categories.categories_name] = [categories.image, handle_categories(categories)]
             
         final_response['categories'] = categories_info
         
@@ -49,7 +49,7 @@ def handle_categories(categories):
     sub_categories = TblSubcategories.objects.filter(category = categories.id).all()
     
     for category in sub_categories:
-        final_response[category.subcategories_name] = category.id
+        final_response[category.subcategories_name] = [ category.image, category.id]
     
     return final_response
 

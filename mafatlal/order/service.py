@@ -66,7 +66,7 @@ def order_place_logic(data):
             }
             products_list.append(product_obj)
         
-        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'], delievery_district = data['district'], delievery_city = data['city'])
+        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'], delievery_district = data['district'], delievery_city = data['city'], image = data['image'] if 'image' in data else None)
         
         order_obj.save()
         order_obj = json_serializer.serialize('json', [order_obj])

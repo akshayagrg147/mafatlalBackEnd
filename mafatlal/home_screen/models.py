@@ -4,6 +4,7 @@ from django.db import models
 class TblCategories(models.Model):
     categories_name = models.CharField(max_length=75)
     state = models.CharField(max_length=75)
+    image = models.CharField(max_length=1000, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -13,6 +14,11 @@ class TblCategories(models.Model):
 class TblSubcategories(models.Model):
     subcategories_name = models.CharField(max_length=75)
     category = models.ForeignKey('self', models.DO_NOTHING, db_column='category')
+    image = models.CharField(max_length=1000, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tbl_subcategories'
 
     class Meta:
         managed = False
