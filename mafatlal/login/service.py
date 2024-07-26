@@ -40,10 +40,22 @@ def register_user(data):
                             updated_by= 'SYSTEM')
         user_obj.save()
         
-        user_obj = json_serializer.serialize('json', [user_obj])
-        user_obj = json.loads(user_obj)
+        user_obj = TblUser.objects.filter(email=data['email']).first()
         
-        response_obj = user_obj[0]['fields']
+        response_obj = {
+            "id"            : user_obj.id,
+            "email"         : user_obj.email,
+            "full_name"     : user_obj.full_name,
+            "password"      : user_obj.password,
+            "salt_key"      : user_obj.salt_key,
+            "state"         : user_obj.state,
+            "district"      : user_obj.district,
+            "user_type"     : user_type_obj.type_number if user_type_obj else 0,
+            "created_on"    : user_obj.created_on,
+            "updated_on"    : user_obj.updated_on,
+            "updated_by"    : user_obj.updated_by,
+            "updated_on"    : user_obj.updated_on,
+        }
         
         return True, response_obj, 'success'
         
