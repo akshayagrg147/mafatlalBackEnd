@@ -18,12 +18,20 @@ def home_screen_logic(user_id):
             return 'Error', None, "User not found"
         
         user_state = user_obj.state
-        categories_info = {}
+        categories_info = []
         
         all_categories = TblCategories.objects.filter(state = user_state).all()
         
         for categories in all_categories:
-            categories_info[categories.categories_name] = handle_categories(categories)
+            category = {
+                "id"            : categories.id,
+                "name"          : categories.categories_name,
+                "img"           : categories.image,
+                "sub_categories": handle_sub_categories(categories.id)
+            }
+            
+            categories_info.append(category)
+            
             
         final_response['categories'] = categories_info
         
@@ -40,16 +48,22 @@ def home_screen_logic(user_id):
 
         return 'Error', None, str(e)
     
-def handle_categories(categories):
-    final_response = {}
+def handle_sub_categories(cat_id=None):
+    final_response = []
     
-    if not categories:
+    if not cat_id:
         return None
     
-    sub_categories = TblSubcategories.objects.filter(category = categories.id).all()
+    sub_categories = TblSubcategories.objects.filter(category = cat_id).all()
     
     for category in sub_categories:
-        final_response[category.subcategories_name] = category.id
+        respo = {
+            "id"    : category.id,
+            "name"  : category.subcategories_name,
+            "img"   : category.image
+        }
+        
+        final_response.append(respo)
     
     return final_response
 
