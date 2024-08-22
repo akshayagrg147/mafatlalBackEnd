@@ -1,4 +1,5 @@
 from django.db import models
+from home_screen.models import TblAddress
 
 
 class TblUser(models.Model):
@@ -13,6 +14,9 @@ class TblUser(models.Model):
     created_by = models.CharField(max_length=50)
     updated_on = models.DateTimeField()
     updated_by = models.CharField(max_length=50)
+    gst_number = models.CharField(max_length=100, blank=True, null=True)
+    shipping_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='shipping_address', blank=True, null=True, related_name="shipping_address")
+    billing_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='billing_address', blank=True, null=True, related_name="billing_address")
 
     class Meta:
         managed = False

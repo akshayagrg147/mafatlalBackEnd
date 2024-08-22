@@ -18,3 +18,7 @@ class order_place_serializer(serializers.Serializer):
     state       = serializers.CharField(max_length = 255)
     pincode     = serializers.CharField(max_length = 255)
     products    = serializers.JSONField()
+    
+class address_update_serializer(serializers.Serializer):
+    user_id     = serializers.IntegerField()
+    address_id  = serializers.IntegerField()

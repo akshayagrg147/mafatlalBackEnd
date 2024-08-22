@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
-from .service import home_screen_logic, product_info_logic,sub_catproduct_info_logic, product_info_list_logic
+from .service import home_screen_logic, product_info_logic,sub_catproduct_info_logic, product_info_list_logic, address_insertion_logic, address_updation_logic
 import json
 
 @api_view(['GET'])
@@ -63,4 +63,27 @@ def product_info(request):
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
         
+@api_view(['POST', 'PATCH'])
+def address_operation(request):
+    print(constants.BREAKCODE)
     
+    status = 'Error'
+    response_data = None
+    message = "Invalid variables/method"
+    data = request.body
+    
+    if data:
+        data = data.decode("utf-8")
+        data = json.loads(data)
+    
+        if request.method == "POST":
+            print(constants.INITAITED_ADDRESS_INSERT_API)
+                
+            status, response_data, message = address_insertion_logic(data)
+            
+        elif request.method == "PATCH":
+            print(constants.INITAITED_ADDRESS_UPDATE_API)
+            
+            status, response_data, message = address_updation_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()

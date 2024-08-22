@@ -1,7 +1,8 @@
-from home_screen.models import TblCategories, TblSubcategories, TblProducts
+from home_screen.models import TblCategories, TblSubcategories, TblProducts, TblAddress
 from mafatlal import constants
 from login.models import TblUser
 from django.db.models import F
+from mafatlal import api_serializer
 from django.core import serializers as json_serializer
 import json, ast
 
@@ -182,4 +183,94 @@ def product_info_list_logic(product_ids):
     
     except Exception as e:
         print(f"Error while extracting th procuct info list as {str(e)}")
+        return 'Error', None, str(e)
+    
+def address_insertion_logic(data):
+    try:
+        response_obj = {}
+        user_id = int(data['user_id']) if 'user_id' in data else None
+        
+        if not user_id:
+            print("Error in address_insertion_logic as User_id is null")
+            raise ValueError("User_id is null")
+        
+        for key, value in data.items():
+            if key != "user_id":
+                address_type    = key
+                landmark        = value['landmark'] if 'landmark' in value else ''
+                state           = value['state'] if 'state' in value else ''
+                district        = value['district'] if 'district' in value else ''
+                address         = value['address'] if 'address' in value else ''
+
+                address_obj = TblAddress(user_id = user_id,
+                                        address_type = address_type,
+                                        landmark = landmark,
+                                        state = state,
+                                        district = district,
+                                        address = address
+                                        )
+                
+                address_obj.save()
+            
+                address_data = TblAddress.objects.filter(user_id = user_id, address_type = address_type).first()
+                
+                response_obj[f'{address_type}_id']          = address_data.id
+                response_obj[f'{address_type}_landmark']    = address_data.landmark
+                response_obj[f'{address_type}_state']       = address_data.state
+                response_obj[f'{address_type}_district']    = address_data.district
+                
+                user_obj = TblUser.objects.filter(id = user_id).first()
+                if address_type == 'billing':
+                    user_obj.billing_address = address_obj
+                    user_obj.save()
+                else:
+                    user_obj.shipping_address = address_obj
+                    user_obj.save()
+        
+        return 'Success', response_obj, 'Address Added successfully'
+    
+    except ValueError as e:
+        print(f"Error in the address_insertion_logic as {str(e)}")
+        return 'Error', None, str(e)
+    
+    except Exception as e:
+        print(f"Error in the address_insertion_logic as {str(e)}")
+        return 'Error', None, str(e)
+    
+def address_updation_logic(data):
+    try:
+        serializer = api_serializer.address_update_serializer(data=data)
+        serializer.is_valid(raise_exception= True)
+        
+        address_id = int(data['address_id']) if 'address_id' in data else None
+        
+        address_obj = TblAddress.objects.filter(id = address_id).first()
+        
+        if address_obj:
+            for key, value in data.items():
+                if hasattr(address_obj, key):
+                    setattr(address_obj, key, value)
+                address_obj.save()
+            
+        else:
+            raise ValueError("Address not found")
+        
+        address_data = TblAddress.objects.filter(id = address_id).first()
+        address_type = address_data.address_type
+        response_obj = {
+            "id"                : address_data.id,
+            f"{address_type}_landmark" : address_data.landmark,
+            f"{address_type}_state"    : address_data.state,
+            f"{address_type}_district" : address_data.district,
+            f"{address_type}_address"  : address_data.address,
+        }
+        
+        return 'Success', response_obj, 'Address Updated successfully'
+    
+    except ValueError as e:
+        print(f"Error in the address_insertion_logic as {str(e)}")
+        return 'Error', None, str(e)
+    
+    except Exception as e:
+        print(f"Error in the address_insertion_logic as {str(e)}")
         return 'Error', None, str(e)
