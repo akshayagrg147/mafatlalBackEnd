@@ -53,10 +53,18 @@ def register_user(data):
             "district"          : user_obj.district,
             "user_type"         : user_type_obj.type_number if user_type_obj else 0,
             "gst_number"        : user_obj.gst_number,
-            "billing_landmark"  : user_obj.billing_address.landmark if user_obj.billing_address else "",
-            "billing_address"   : user_obj.billing_address.address if user_obj.billing_address else "",
-            "shipping_landmark" : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
-            "shipping_address"  : user_obj.shipping_address.address if user_obj.shipping_address else "",
+            "shipping"          : {
+                                    "landmark"  : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
+                                    "state"     : user_obj.shipping_address.state if user_obj.shipping_address else "",
+                                    "district"  : user_obj.shipping_address.district if user_obj.shipping_address else "",
+                                    "address"   : user_obj.shipping_address.address if user_obj.shipping_address else ""
+                                    },
+            "billing"           : {
+                                    "landmark"  : user_obj.billing_address.landmark if user_obj.billing_address else "",
+                                    "state"     : user_obj.billing_address.state if user_obj.billing_address else "",
+                                    "district"  : user_obj.billing_address.district if user_obj.billing_address else "",
+                                    "address"   : user_obj.billing_address.address if user_obj.billing_address else ""
+                                    },
             "created_on"        : user_obj.created_on,
             "updated_on"        : user_obj.updated_on,
             "updated_by"        : user_obj.updated_by,
@@ -96,10 +104,18 @@ def login_check(data):
                 "state"             : user_obj.state,
                 "district"          : user_obj.district,
                 "gst_number"        : user_obj.gst_number,
-                "billing_landmark"  : user_obj.billing_address.landmark if user_obj.billing_address else "",
-                "billing_address"   : user_obj.billing_address.address if user_obj.billing_address else "",
-                "shipping_landmark" : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
-                "shipping_address"  : user_obj.shipping_address.address if user_obj.shipping_address else "",
+                "shipping"          : {
+                                        "landmark"  : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
+                                        "state"     : user_obj.shipping_address.state if user_obj.shipping_address else "",
+                                        "district"  : user_obj.shipping_address.district if user_obj.shipping_address else "",
+                                        "address"   : user_obj.shipping_address.address if user_obj.shipping_address else ""
+                                        },
+                "billing"           : {
+                                        "landmark"  : user_obj.billing_address.landmark if user_obj.billing_address else "",
+                                        "state"     : user_obj.billing_address.state if user_obj.billing_address else "",
+                                        "district"  : user_obj.billing_address.district if user_obj.billing_address else "",
+                                        "address"   : user_obj.billing_address.address if user_obj.billing_address else ""
+                                        },
                 "user_type"         : user_obj.user_type,
                 "created_on"        : user_obj.created_on,
                 "updated_on"        : user_obj.updated_on,

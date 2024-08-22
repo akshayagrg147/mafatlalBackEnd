@@ -243,6 +243,7 @@ def address_updation_logic(data):
         serializer.is_valid(raise_exception= True)
         
         address_id = int(data['address_id']) if 'address_id' in data else None
+        address_type = data['address_type'] if 'address_type' in data else 'billing'
         
         address_obj = TblAddress.objects.filter(id = address_id).first()
         
@@ -255,10 +256,11 @@ def address_updation_logic(data):
         else:
             raise ValueError("Address not found")
         
-        address_data = TblAddress.objects.filter(id = address_id).first()
+        address_data = TblAddress.objects.filter(id = address_id, address_type = address_type).first()
         address_type = address_data.address_type
         response_obj = {
             "id"                : address_data.id,
+            "address_type"      : address_data.address_type,
             f"{address_type}_landmark" : address_data.landmark,
             f"{address_type}_state"    : address_data.state,
             f"{address_type}_district" : address_data.district,
