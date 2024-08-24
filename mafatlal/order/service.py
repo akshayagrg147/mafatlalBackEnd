@@ -6,9 +6,10 @@ from django.core import serializers as json_serializer
 import ast, datetime, json
 
 
-def order_history_logic(user_id):
+def order_history_logic(data):
     try:
         final_response = []
+        user_id = data['user_id'] if 'user_id' in data else None
         if not user_id:
             print("User can't be none")
             raise ValueError("User can't be none")
@@ -17,7 +18,16 @@ def order_history_logic(user_id):
         if not user_obj:
             raise ValueError("No user found")
         
-        orders_objs = TblOrder.objects.filter(user_id = user_id).all()
+        # If user_type is 1 then user is a distributor so 
+        # we show all order of his state
+        if user_obj.user_type == 1:
+            from_date = data['from'] if 'from' in data else datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            to_date = data['to'] if 'to' in data else datetime.datetime.now(datetime.timezone.utc)
+            orders_objs = TblOrder.objects.filter(delievery_state = user_obj.state, created_on__gt = from_date, created_on__lt = to_date).all()
+            
+        # if user_type is 0 then we show order of that user only
+        else:
+            orders_objs = TblOrder.objects.filter(user_id = user_id).all()
         
         for order in orders_objs:
             response = {
@@ -94,7 +104,7 @@ def order_details_logic(order_id):
         if not order_object:
             print("Can't find order with this id")
             raise ValueError("Can't find order with this id")
-        
+         
         product_details = []
         if order_object.order_details:
             for products in ast.literal_eval(order_object.order_details):

@@ -12,9 +12,7 @@ def order_history(request):
     
     data = request.query_params
     
-    user_id = data['user_id'] if 'user_id' in data else None
-    
-    status, response_data, message = order_history_logic(user_id)
+    status, response_data, message = order_history_logic(data)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
 
