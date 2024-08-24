@@ -46,7 +46,8 @@ def order_history_logic(data):
                 "created_on"            : order.created_on,
                 "created_by"            : order.created_by,
                 "updated_on"            : order.updated_on,
-                "updated_by"            : order.updated_by
+                "updated_by"            : order.updated_by,
+                "tracking_url"          : order.tracking_url
             }
             
             final_response.append(response)
@@ -76,7 +77,7 @@ def order_place_logic(data):
             }
             products_list.append(product_obj)
         
-        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'], delievery_district = data['district'], delievery_city = data['city'], product_image = data['image'] if 'image' in data else None)
+        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'], delievery_district = data['district'], delievery_city = data['city'], product_image = data['image'] if 'image' in data else None, tracking_url = None)
         
         order_obj.save()
         order_obj = json_serializer.serialize('json', [order_obj])
@@ -133,6 +134,7 @@ def order_details_logic(order_id):
         final_response['district']      = order_object.delievery_district
         final_response['city']          = order_object.delievery_city
         final_response['pincode']       = order_object.delievery_pincode
+        final_response['tracking_url']  = order_object.tracking_url
         
         return True, final_response, "Order placed successfully"
     
@@ -144,3 +146,48 @@ def order_details_logic(order_id):
         print(f"Error at order details api {str(e)}")
         return False, None, str(e)
     
+    
+def order_status_update_logic(data):
+    try:
+        order_id = data['order_id'] if 'order_id' in data else None
+        if not order_id:
+            print("Order id can't be null")
+            raise ValueError("Order id can't be null")
+        
+        order_object = TblOrder.objects.filter(id = order_id).first()
+        if not order_object:
+            print("Can't find order with this id")
+            raise ValueError("Can't find order with this id")
+        
+        permissioned_status = ['ordered', 'cancelled', 'dispatched']
+        
+        status = data['status'] if 'status' in data or data['status'] in permissioned_status else None
+        
+        if not status:
+            raise ValueError("Error in order_status_update as status is not correct")
+        
+        order_object.order_status = status
+        
+        if status == 'dispatched':
+            tracking_url = data['tracking_url'] if 'tracking_url' in data else None
+            
+            if not tracking_url:
+                raise ValueError("Error in order_status_update as tracking url is not mentioned")
+            
+            order_object.tracking_url = tracking_url
+            
+        order_object.save()
+        
+        order_obj = json_serializer.serialize('json', [order_object])
+        order_obj = json.loads(order_obj)
+        
+        response_obj = order_obj[0]['fields']
+        return True, response_obj, "Order status updated successfully"
+        
+    except ValueError as ve:
+        print(f"Error at order_status_update api {str(ve)}")
+        return False, None, str(ve)
+    
+    except Exception as e:
+        print(f"Error at order_status_update api {str(e)}")
+        return False, None, str(e)
