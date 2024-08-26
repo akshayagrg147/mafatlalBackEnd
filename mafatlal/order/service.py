@@ -18,16 +18,7 @@ def order_history_logic(data):
         if not user_obj:
             raise ValueError("No user found")
         
-        # If user_type is 1 then user is a distributor so 
-        # we show all order of his state
-        if user_obj.user_type == 1:
-            from_date = data['from'] if 'from' in data else datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-            to_date = data['to'] if 'to' in data else datetime.datetime.now(datetime.timezone.utc)
-            orders_objs = TblOrder.objects.filter(delievery_state = user_obj.state, created_on__gt = from_date, created_on__lt = to_date).all()
-            
-        # if user_type is 0 then we show order of that user only
-        else:
-            orders_objs = TblOrder.objects.filter(user_id = user_id).all()
+        orders_objs = TblOrder.objects.filter(user_id = user_id).all()
         
         for order in orders_objs:
             response = {
@@ -60,7 +51,6 @@ def order_history_logic(data):
     except Exception as e:
         print(f"Error at order history api {str(e)}")
         return False, None, str(e)
-
 
 def order_place_logic(data):
     try:
@@ -145,8 +135,7 @@ def order_details_logic(order_id):
     except Exception as e:
         print(f"Error at order details api {str(e)}")
         return False, None, str(e)
-    
-    
+     
 def order_status_update_logic(data):
     try:
         order_id = data['order_id'] if 'order_id' in data else None
@@ -191,3 +180,76 @@ def order_status_update_logic(data):
     except Exception as e:
         print(f"Error at order_status_update api {str(e)}")
         return False, None, str(e)
+    
+def order_list_logic(data):
+    try:
+        final_response = []
+        user_id = data['user_id'] if 'user_id' in data else None
+        if not user_id:
+            print("User can't be none")
+            raise ValueError("User can't be none")
+        
+        user_obj = TblUser.objects.filter(id = user_id).first()
+        if not user_obj:
+            raise ValueError("No user found")
+        
+        page = data['page'] if 'page' in data else 1
+        
+        # If user_type is 1 then user is a distributor so 
+        # we show all order of his state
+        if user_obj.user_type == 2:
+            from_date = data['from'] if 'from' in data else datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            to_date = data['to'] if 'to' in data else datetime.datetime.now(datetime.timezone.utc)
+            
+            order_status = data['status'] if 'status' in data else None
+            
+            if order_status:
+                orders_objs = TblOrder.objects.filter(delievery_state = user_obj.state, created_on__gt = from_date, created_on__lt = to_date, order_status = order_status).all().order_by('created_on')
+                
+            else:
+                orders_objs = TblOrder.objects.filter(delievery_state = user_obj.state, created_on__gt = from_date, created_on__lt = to_date).all().order_by('created_on')
+            
+        # if user_type is 0 then we show order of that user only
+        else:
+            orders_objs = TblOrder.objects.filter(user_id = user_id).all()
+            
+        total_orders = len(orders_objs)
+        limit = 20*int(page) if 20*int(page) - total_orders < 0 else total_orders
+        
+        for flag in range(20*(int(page)-1), limit):
+            customer_obj = TblUser.objects.filter(id = orders_objs[flag].user_id).first()
+            response = {
+                "order_id"              : orders_objs[flag].id,
+                "created_on"            : orders_objs[flag].created_on,
+                "customer_name"         : customer_obj.full_name,
+                "product_quantity"      : orders_objs[flag].product_quantity,
+                "user_id"               : orders_objs[flag].user_id,
+                "channel"               : "Online Store",
+                "price"                 : orders_objs[flag].price,
+                "product_image"         : orders_objs[flag].product_image,
+                "delievery_method"      : "Free Shipping" if float(orders_objs[flag].price) > 500 else "Standard Shipping",
+                "description"           : orders_objs[flag].description,
+                "order_status"          : orders_objs[flag].order_status,
+                "delievery_address"     : orders_objs[flag].delievery_address,
+                "delievery_state"       : orders_objs[flag].delievery_state,
+                "delievery_district"    : orders_objs[flag].delievery_district,
+                "delievery_city"        : orders_objs[flag].delievery_city,
+                "delievery_pincode"     : orders_objs[flag].delievery_pincode,
+                "created_by"            : orders_objs[flag].created_by,
+                "updated_on"            : orders_objs[flag].updated_on,
+                "updated_by"            : orders_objs[flag].updated_by,
+                "tracking_url"          : orders_objs[flag].tracking_url
+            }
+            
+            final_response.append(response)
+        return True, final_response, "Order list fetch successfully"
+        
+    
+    except ValueError as ve:
+        print(f"Error at order list api {str(ve)}")
+        return False, None, str(ve)
+    
+    except Exception as e:
+        print(f"Error at order list api {str(e)}")
+        return False, None, str(e)
+
