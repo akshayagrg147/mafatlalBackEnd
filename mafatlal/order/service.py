@@ -204,10 +204,19 @@ def order_list_logic(data):
             order_status = data['status'] if 'status' in data else None
             
             if order_status:
-                orders_objs = TblOrder.objects.filter(delievery_state = user_obj.state, created_on__gt = from_date, created_on__lt = to_date, order_status = order_status).all().order_by('created_on')
+                orders_objs = TblOrder.objects.filter(
+                    user_id=user_id,
+                    created_on__gt=from_date,
+                    created_on__lt=to_date,
+                    order_status = order_status
+                ).order_by('-created_on')
                 
             else:
-                orders_objs = TblOrder.objects.filter(delievery_state = user_obj.state, created_on__gt = from_date, created_on__lt = to_date).all().order_by('created_on')
+                orders_objs = TblOrder.objects.filter(
+                    user_id=user_id,
+                    created_on__gt=from_date,
+                    created_on__lt=to_date
+                ).order_by('-created_on')
             
         # if user_type is 0 then we show order of that user only
         else:
