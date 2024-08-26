@@ -205,7 +205,6 @@ def order_list_logic(data):
             
             if order_status:
                 orders_objs = TblOrder.objects.filter(
-                    user_id=user_id,
                     created_on__gt=from_date,
                     created_on__lt=to_date,
                     order_status = order_status
@@ -213,7 +212,6 @@ def order_list_logic(data):
                 
             else:
                 orders_objs = TblOrder.objects.filter(
-                    user_id=user_id,
                     created_on__gt=from_date,
                     created_on__lt=to_date
                 ).order_by('-created_on')
@@ -230,7 +228,7 @@ def order_list_logic(data):
             response = {
                 "order_id"              : orders_objs[flag].id,
                 "created_on"            : orders_objs[flag].created_on,
-                "customer_name"         : customer_obj.full_name,
+                "customer_name"         : customer_obj.full_name if customer_obj else "",
                 "product_quantity"      : orders_objs[flag].product_quantity,
                 "user_id"               : orders_objs[flag].user_id,
                 "channel"               : "Online Store",
@@ -287,7 +285,6 @@ def order_stats_logic(data):
         
         # Filter the orders based on the status if provided
         filter_args = {
-            'user_id': user_id,
             'created_on__gt': from_date,
             'created_on__lt': to_date
         }
