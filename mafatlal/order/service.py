@@ -1,5 +1,6 @@
 from .models import TblOrder
 from login.models import TblUser
+from home_screen.models import TblAddress
 from mafatlal import api_serializer
 from home_screen.service import product_info_logic
 from django.core import serializers as json_serializer
@@ -26,20 +27,36 @@ def order_history_logic(data):
                 "product_quantity"      : order.product_quantity,
                 "user_id"               : order.user_id,
                 "price"                 : order.price,
-                "product_image"         : order.product_image,
                 "description"           : order.description,
                 "order_status"          : order.order_status,
-                "delievery_address"     : order.delievery_address,
-                "delievery_state"       : order.delievery_state,
-                "delievery_district"    : order.delievery_district,
-                "delievery_city"        : order.delievery_city,
-                "delievery_pincode"     : order.delievery_pincode,
+                "shipping"              : None,
+                "billing"               : None,
                 "created_on"            : order.created_on,
                 "created_by"            : order.created_by,
                 "updated_on"            : order.updated_on,
                 "updated_by"            : order.updated_by,
                 "tracking_url"          : order.tracking_url
             }
+            if order.shipping_address:
+                response['shipping'] = {
+                                        "landmark"  : order.shipping_address.landmark if order.shipping_address else "",
+                                        "state"     : order.shipping_address.state if order.shipping_address else "",
+                                        "district"  : order.shipping_address.district if order.shipping_address else "",
+                                        "street_address_1"  : order.shipping_address.street_address_1 if order.shipping_address else "",
+                                        "street_address_2"  : order.shipping_address.street_address_2 if order.shipping_address else "",
+                                        "pincode"   : order.shipping_address.pincode if order.shipping_address else "",
+                                        "city"      : order.shipping_address.city if order.shipping_address else ""
+                                            }
+            if order.billing_address:
+                response['billing'] = {
+                                        "landmark"  : order.billing_address.landmark if order.billing_address else "",
+                                        "state"     : order.billing_address.state if order.billing_address else "",
+                                        "district"  : order.billing_address.district if order.billing_address else "",
+                                        "street_address_1"  : order.billing_address.street_address_1 if order.billing_address else "",
+                                        "street_address_2"  : order.billing_address.street_address_2 if order.billing_address else "",
+                                        "pincode"   : order.billing_address.pincode if order.billing_address else "",
+                                        "city"      : order.billing_address.city if order.billing_address else ""
+                                        }
             
             final_response.append(response)
         return True, final_response, "Order history fetch successfully"
@@ -56,25 +73,159 @@ def order_place_logic(data):
     try:
         serializer = api_serializer.order_place_serializer(data=data)
         serializer.is_valid(raise_exception= True)
+        
+        shipping_obj    = None
+        billing_obj     = None
             
         products_list = []
         for products in data['products']:
             product_obj = {
                 "product_id"    : products['product_id'],
-                "size"          : products['size'],
                 "quantity"      : products['quantity'],
                 "price"         : products['price']
             }
+            if 'size' in products:
+                product_obj["size"] = products['size']
+                
             products_list.append(product_obj)
+            
+        shipping_address = data['shipping'] if 'shipping' in data else None
+        billing_address = data['billing'] if 'billing' in data else None
         
-        order_obj = TblOrder(product_quantity = len(data['products']), user_id = data['user_id'], price = data['price'], order_details = products_list, delievery_address = data['address'], delievery_state = data['state'], delievery_pincode = data['pincode'], order_status='Pending', created_on = datetime.datetime.now(datetime.timezone.utc), updated_on = datetime.datetime.now(datetime.timezone.utc), created_by = data['user_id'], delievery_district = data['district'], delievery_city = data['city'], product_image = data['image'] if 'image' in data else None, tracking_url = None)
+        if shipping_address:
+            if 'id' in shipping_address:
+                shipping_obj = TblAddress.objects.filter(id = shipping_address['id'], user_id = data['user_id']).first()
+                
+            else:
+                landmark        = shipping_address['landmark'] if 'landmark' in shipping_address else ''
+                state           = shipping_address['state'] if 'state' in shipping_address else ''
+                district        = shipping_address['district'] if 'district' in shipping_address else ''
+                address_1       = shipping_address['street_address_1'] if 'street_address_1' in shipping_address else ''
+                address_2       = shipping_address['street_address_2'] if 'street_address_2' in shipping_address else ''
+                pincode         = shipping_address['pincode'] if 'pincode' in shipping_address else ''
+                city            = shipping_address['city'] if 'city' in shipping_address else ''
+                
+                shipping_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "shipping").first()
+                
+                if shipping_obj:
+                    shipping_obj.landmark = landmark
+                    shipping_obj.state = state
+                    shipping_obj.district = district
+                    shipping_obj.street_address_1 = address_1
+                    shipping_obj.pincode = pincode
+                    shipping_obj.city = city
+                    shipping_obj.street_address_2 = address_2
+                    
+                    shipping_obj.save()
+                
+                else:
+                    shipping_obj = TblAddress(user_id = data['user_id'], 
+                                              address_type = "shipping",
+                                              landmark = landmark,
+                                              state = state,
+                                              district = district,
+                                              street_address_1 = address_1,
+                                              pincode = pincode,
+                                              city = city,
+                                              street_address_2 = address_2)
+                    
+                    shipping_obj.save()
+                    
+                    shipping_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "shipping").first()
+                
+        if billing_address:
+            if 'id' in billing_address:
+                billing_obj = TblAddress.objects.filter(id = billing_address['id'], user_id = data['user_id']).first()
+                
+            else:
+                landmark        = billing_address['landmark'] if 'landmark' in billing_address else ''
+                state           = billing_address['state'] if 'state' in billing_address else ''
+                district        = billing_address['district'] if 'district' in billing_address else ''
+                address_1       = billing_address['street_address_1'] if 'street_address_1' in billing_address else ''
+                address_2       = billing_address['street_address_2'] if 'street_address_2' in billing_address else ''
+                pincode         = billing_address['pincode'] if 'pincode' in billing_address else ''
+                city            = billing_address['city'] if 'city' in billing_address else ''
+                
+                billing_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "billing").first()
+                
+                if billing_obj:
+                    billing_obj.landmark = landmark
+                    billing_obj.state = state
+                    billing_obj.district = district
+                    billing_obj.street_address_1 = address_1
+                    billing_obj.pincode = pincode
+                    billing_obj.city = city
+                    billing_obj.street_address_2 = address_2
+                    
+                    billing_obj.save()
+                
+                else:
+                    billing_obj = TblAddress(user_id = data['user_id'], 
+                                              address_type = "billing",
+                                              landmark = landmark,
+                                              state = state,
+                                              district = district,
+                                              street_address_1 = address_1,
+                                              pincode = pincode,
+                                              city = city,
+                                              street_address_2 = address_2)
+                    
+                    billing_obj.save()
+                    
+                    billing_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "billing").first()
+                
+        
+        order_obj = TblOrder(product_quantity = len(data['products']), 
+                             user_id = data['user_id'], 
+                             price = data['price'], 
+                             order_details = products_list,  
+                             order_status='Pending', 
+                             shipping_address = shipping_obj if shipping_obj else None,
+                             billing_address = billing_obj if billing_obj else None,
+                             created_on = datetime.datetime.now(datetime.timezone.utc), 
+                             updated_on = datetime.datetime.now(datetime.timezone.utc), 
+                             created_by = data['user_id'],
+                             tracking_url = None)
         
         order_obj.save()
-        order_obj = json_serializer.serialize('json', [order_obj])
-        order_obj = json.loads(order_obj)
+        response = {
+                "order_id"              : order_obj.id,
+                "product_quantity"      : order_obj.product_quantity,
+                "user_id"               : order_obj.user_id,
+                "price"                 : order_obj.price,
+                "product_image"         : order_obj.product_image,
+                "description"           : order_obj.description,
+                "order_status"          : order_obj.order_status,
+                "shipping"              : None,
+                "billing"               : None,
+                "created_on"            : order_obj.created_on,
+                "created_by"            : order_obj.created_by,
+                "updated_on"            : order_obj.updated_on,
+                "updated_by"            : order_obj.updated_by,
+                "tracking_url"          : order_obj.tracking_url
+            }
+        if order_obj.shipping_address:
+            response['shipping'] = {
+                                    "landmark"  : order_obj.shipping_address.landmark if order_obj.shipping_address else "",
+                                    "state"     : order_obj.shipping_address.state if order_obj.shipping_address else "",
+                                    "district"  : order_obj.shipping_address.district if order_obj.shipping_address else "",
+                                    "street_address_1"  : order_obj.shipping_address.street_address_1 if order_obj.shipping_address else "",
+                                    "street_address_2"  : order_obj.shipping_address.street_address_2 if order_obj.shipping_address else "",
+                                    "pincode"   : order_obj.shipping_address.pincode if order_obj.shipping_address else "",
+                                    "city"      : order_obj.shipping_address.city if order_obj.shipping_address else ""
+                                        }
+        if order_obj.billing_address:
+            response['billing'] = {
+                                    "landmark"  : order_obj.billing_address.landmark if order_obj.billing_address else "",
+                                    "state"     : order_obj.billing_address.state if order_obj.billing_address else "",
+                                    "district"  : order_obj.billing_address.district if order_obj.billing_address else "",
+                                    "street_address_1"  : order_obj.billing_address.street_address_1 if order_obj.billing_address else "",
+                                    "street_address_2"  : order_obj.billing_address.street_address_2 if order_obj.billing_address else "",
+                                    "pincode"   : order_obj.billing_address.pincode if order_obj.billing_address else "",
+                                    "city"      : order_obj.billing_address.city if order_obj.billing_address else ""
+                                    }
         
-        response_obj = order_obj[0]['fields']
-        return True, response_obj, "Order placed successfully"
+        return True, response, "Order placed successfully"
         
     except ValueError as ve:
         print(f"Error at order placing api {str(ve)}")
@@ -104,13 +255,38 @@ def order_details_logic(order_id):
                 print(f"Status and message for product id {products['product_id']} is {status} {message}")
                 if response_data:
                     product_info['product_id']          = products['product_id']
-                    product_info['size']                = products['size']
                     product_info['quantity']            = products['quantity']
                     product_info['price']               = products['price']
                     product_info['product_image']       = response_data['product_image']
                     product_info['product_name']        = response_data['name']
                     product_info['product_category']    = response_data['product_category']
+                    if 'size' in products:
+                        product_info['size'] = products['size']
                 product_details.append(product_info)
+        
+        final_response['shipping'] = None
+        final_response['billing'] = None
+                
+        if order_object.shipping_address:
+            final_response['shipping'] = {
+                                    "landmark"          : order_object.shipping_address.landmark if order_object.shipping_address else "",
+                                    "state"             : order_object.shipping_address.state if order_object.shipping_address else "",
+                                    "district"          : order_object.shipping_address.district if order_object.shipping_address else "",
+                                    "street_address_1"  : order_object.shipping_address.street_address_1 if order_object.shipping_address else "",
+                                    "street_address_2"  : order_object.shipping_address.street_address_2 if order_object.shipping_address else "",
+                                    "pincode"           : order_object.shipping_address.pincode if order_object.shipping_address else "",
+                                    "city"              : order_object.shipping_address.city if order_object.shipping_address else ""
+                                        }
+        if order_object.billing_address:
+            final_response['billing'] = {
+                                    "landmark"          : order_object.billing_address.landmark if order_object.billing_address else "",
+                                    "state"             : order_object.billing_address.state if order_object.billing_address else "",
+                                    "district"          : order_object.billing_address.district if order_object.billing_address else "",
+                                    "street_address_1"  : order_object.billing_address.street_address_1 if order_object.billing_address else "",
+                                    "street_address_2"  : order_object.billing_address.street_address_2 if order_object.billing_address else "",
+                                    "pincode"           : order_object.billing_address.pincode if order_object.billing_address else "",
+                                    "city"              : order_object.billing_address.city if order_object.billing_address else ""
+                                    }
         
         final_response['order_id']      = order_object.id
         final_response['user_id']       = order_object.user_id
@@ -119,11 +295,6 @@ def order_details_logic(order_id):
         final_response['quantity']      = order_object.product_quantity
         final_response['order_status']  = order_object.order_status
         final_response['order_placed']  = order_object.created_on
-        final_response['address']       = order_object.delievery_address
-        final_response['state']         = order_object.delievery_state
-        final_response['district']      = order_object.delievery_district
-        final_response['city']          = order_object.delievery_city
-        final_response['pincode']       = order_object.delievery_pincode
         final_response['tracking_url']  = order_object.tracking_url
         
         return True, final_response, "Order placed successfully"
@@ -167,11 +338,43 @@ def order_status_update_logic(data):
             
         order_object.save()
         
-        order_obj = json_serializer.serialize('json', [order_object])
-        order_obj = json.loads(order_obj)
+        response = {
+                "order_id"              : order_object.id,
+                "product_quantity"      : order_object.product_quantity,
+                "user_id"               : order_object.user_id,
+                "price"                 : order_object.price,
+                "description"           : order_object.description,
+                "order_status"          : order_object.order_status,
+                "shipping"              : None,
+                "billing"               : None,
+                "created_on"            : order_object.created_on,
+                "created_by"            : order_object.created_by,
+                "updated_on"            : order_object.updated_on,
+                "updated_by"            : order_object.updated_by,
+                "tracking_url"          : order_object.tracking_url
+            }
+        if order_object.shipping_address:
+            response['shipping'] = {
+                                    "landmark"  : order_object.shipping_address.landmark if order_object.shipping_address else "",
+                                    "state"     : order_object.shipping_address.state if order_object.shipping_address else "",
+                                    "district"  : order_object.shipping_address.district if order_object.shipping_address else "",
+                                    "street_address_1"  : order_object.shipping_address.street_address_1 if order_object.shipping_address else "",
+                                    "street_address_2"  : order_object.shipping_address.street_address_2 if order_object.shipping_address else "",
+                                    "pincode"   : order_object.shipping_address.pincode if order_object.shipping_address else "",
+                                    "city"      : order_object.shipping_address.city if order_object.shipping_address else ""
+                                        }
+        if order_object.billing_address:
+            response['billing'] = {
+                                    "landmark"  : order_object.billing_address.landmark if order_object.billing_address else "",
+                                    "state"     : order_object.billing_address.state if order_object.billing_address else "",
+                                    "district"  : order_object.billing_address.district if order_object.billing_address else "",
+                                    "street_address_1"  : order_object.billing_address.street_address_1 if order_object.billing_address else "",
+                                    "street_address_2"  : order_object.billing_address.street_address_2 if order_object.billing_address else "",
+                                    "pincode"   : order_object.billing_address.pincode if order_object.billing_address else "",
+                                    "city"      : order_object.billing_address.city if order_object.billing_address else ""
+                                    }
         
-        response_obj = order_obj[0]['fields']
-        return True, response_obj, "Order status updated successfully"
+        return True, response, "Order status updated successfully"
         
     except ValueError as ve:
         print(f"Error at order_status_update api {str(ve)}")
@@ -233,20 +436,37 @@ def order_list_logic(data):
                 "user_id"               : orders_objs[flag].user_id,
                 "channel"               : "Online Store",
                 "price"                 : orders_objs[flag].price,
-                "product_image"         : orders_objs[flag].product_image,
                 "delievery_method"      : "Free Shipping" if float(orders_objs[flag].price) > 500 else "Standard Shipping",
                 "description"           : orders_objs[flag].description,
                 "order_status"          : orders_objs[flag].order_status,
-                "delievery_address"     : orders_objs[flag].delievery_address,
-                "delievery_state"       : orders_objs[flag].delievery_state,
-                "delievery_district"    : orders_objs[flag].delievery_district,
-                "delievery_city"        : orders_objs[flag].delievery_city,
-                "delievery_pincode"     : orders_objs[flag].delievery_pincode,
+                "shipping"              : None,
+                "billing"               : None,
                 "created_by"            : orders_objs[flag].created_by,
                 "updated_on"            : orders_objs[flag].updated_on,
                 "updated_by"            : orders_objs[flag].updated_by,
                 "tracking_url"          : orders_objs[flag].tracking_url
             }
+            
+            if orders_objs[flag].shipping_address:
+                response['shipping'] = {
+                                        "landmark"          : orders_objs[flag].shipping_address.landmark if orders_objs[flag].shipping_address else "",
+                                        "state"             : orders_objs[flag].shipping_address.state if orders_objs[flag].shipping_address else "",
+                                        "district"          : orders_objs[flag].shipping_address.district if orders_objs[flag].shipping_address else "",
+                                        "street_address_1"  : orders_objs[flag].shipping_address.street_address_1 if orders_objs[flag].shipping_address else "",
+                                        "street_address_2"  : orders_objs[flag].shipping_address.street_address_2 if orders_objs[flag].shipping_address else "",
+                                        "pincode"           : orders_objs[flag].shipping_address.pincode if orders_objs[flag].shipping_address else "",
+                                        "city"              : orders_objs[flag].shipping_address.city if orders_objs[flag].shipping_address else ""
+                                            }
+            if orders_objs[flag].billing_address:
+                response['billing'] = {
+                                        "landmark"          : orders_objs[flag].billing_address.landmark if orders_objs[flag].billing_address else "",
+                                        "state"             : orders_objs[flag].billing_address.state if orders_objs[flag].billing_address else "",
+                                        "district"          : orders_objs[flag].billing_address.district if orders_objs[flag].billing_address else "",
+                                        "street_address_1"  : orders_objs[flag].billing_address.street_address_1 if orders_objs[flag].billing_address else "",
+                                        "street_address_2"  : orders_objs[flag].billing_address.street_address_2 if orders_objs[flag].billing_address else "",
+                                        "pincode"           : orders_objs[flag].billing_address.pincode if orders_objs[flag].billing_address else "",
+                                        "city"              : orders_objs[flag].billing_address.city if orders_objs[flag].billing_address else ""
+                                        }
             
             final_response.append(response)
         return True, final_response, "Order list fetch successfully"

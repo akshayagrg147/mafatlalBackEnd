@@ -14,9 +14,6 @@ class user_login_serializer(serializers.Serializer):
 class order_place_serializer(serializers.Serializer):
     user_id     = serializers.IntegerField()
     price       = serializers.CharField(max_length = 255)
-    address     = serializers.CharField(max_length = 255)
-    state       = serializers.CharField(max_length = 255)
-    pincode     = serializers.CharField(max_length = 255)
     products    = serializers.JSONField()
     
 class address_update_serializer(serializers.Serializer):

@@ -1,5 +1,5 @@
 from django.db import models
-from home_screen.models import TblProducts
+from home_screen.models import TblAddress
 
 # Create your models here.
 class TblOrder(models.Model):
@@ -11,16 +11,13 @@ class TblOrder(models.Model):
     order_details = models.CharField(max_length=100, blank=True, null=True)
     size_available = models.CharField(max_length=100, blank=True, null=True)
     order_status = models.CharField(max_length=30, blank=True, null=True)
-    delievery_address = models.CharField(max_length=30)
-    delievery_state = models.CharField(max_length=30)
-    delievery_pincode = models.BigIntegerField()
-    delievery_district = models.CharField(max_length=100, blank=True, null=True)
-    delievery_city = models.CharField(max_length=100, blank=True, null=True)
     created_on = models.DateTimeField(blank=True, null=True)
     created_by = models.CharField(max_length=50, blank=True, null=True)
     updated_on = models.DateTimeField(blank=True, null=True)
     updated_by = models.CharField(max_length=50, blank=True, null=True)
     tracking_url = models.CharField(max_length=100, blank=True, null=True)
+    shipping_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='shipping_address', blank=True, null=True, related_name='shipping')
+    billing_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='billing_address', blank=True, null=True, related_name='billing')
 
     class Meta:
         managed = False
