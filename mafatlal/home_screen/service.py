@@ -200,24 +200,34 @@ def address_insertion_logic(data):
                 landmark        = value['landmark'] if 'landmark' in value else ''
                 state           = value['state'] if 'state' in value else ''
                 district        = value['district'] if 'district' in value else ''
-                address         = value['address'] if 'address' in value else ''
+                address_1       = value['street_address_1'] if 'street_address_1' in value else ''
+                address_2       = value['street_address_2'] if 'street_address_2' in value else ''
+                pincode         = value['pincode'] if 'pincode' in value else ''
+                city            = value['city'] if 'city' in value else ''
 
                 address_obj = TblAddress(user_id = user_id,
                                         address_type = address_type,
                                         landmark = landmark,
                                         state = state,
                                         district = district,
-                                        address = address
+                                        street_address_1 = address_1,
+                                        street_address_2 = address_2,
+                                        pincode = pincode, 
+                                        city = city
                                         )
                 
                 address_obj.save()
             
                 address_data = TblAddress.objects.filter(user_id = user_id, address_type = address_type).first()
                 
-                response_obj[f'{address_type}_id']          = address_data.id
-                response_obj[f'{address_type}_landmark']    = address_data.landmark
-                response_obj[f'{address_type}_state']       = address_data.state
-                response_obj[f'{address_type}_district']    = address_data.district
+                response_obj[f'{address_type}_id']                  = address_data.id
+                response_obj[f'{address_type}_landmark']            = address_data.landmark
+                response_obj[f'{address_type}_street_address_1']    = address_data.street_address_1
+                response_obj[f'{address_type}_street_address_2']    = address_data.street_address_2
+                response_obj[f'{address_type}_state']               = address_data.state
+                response_obj[f'{address_type}_district']            = address_data.district
+                response_obj[f'{address_type}_pincode']             = address_data.pincode
+                response_obj[f'{address_type}_city']                = address_data.city
                 
                 user_obj = TblUser.objects.filter(id = user_id).first()
                 if address_type == 'billing':
@@ -259,12 +269,15 @@ def address_updation_logic(data):
         address_data = TblAddress.objects.filter(id = address_id, address_type = address_type).first()
         address_type = address_data.address_type
         response_obj = {
-            "id"                : address_data.id,
-            "address_type"      : address_data.address_type,
-            f"{address_type}_landmark" : address_data.landmark,
-            f"{address_type}_state"    : address_data.state,
-            f"{address_type}_district" : address_data.district,
-            f"{address_type}_address"  : address_data.address,
+            "id"                                : address_data.id,
+            "address_type"                      : address_data.address_type,
+            f"{address_type}_landmark"          : address_data.landmark,
+            f"{address_type}_state"             : address_data.state,
+            f"{address_type}_district"          : address_data.district,
+            f"{address_type}_street_address_1"  : address_data.street_address_1,
+            f"{address_type}_street_address_2"  : address_data.street_address_2,
+            f"{address_type}_pincode"           : address_data.pincode,
+            f"{address_type}_city"              : address_data.city,
         }
         
         return 'Success', response_obj, 'Address Updated successfully'

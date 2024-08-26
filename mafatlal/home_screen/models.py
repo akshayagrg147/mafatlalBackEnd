@@ -43,7 +43,10 @@ class TblAddress(models.Model):
     landmark = models.CharField(max_length=50, blank=True, null=True)
     state = models.CharField(max_length=75, blank=True, null=True)
     district = models.CharField(max_length=75, blank=True, null=True)
-    address = models.CharField(max_length=100, blank=True, null=True)
+    street_address_1 = models.CharField(max_length=100, blank=True, null=True)
+    pincode = models.CharField(max_length=50, blank=True, null=True)
+    city = models.CharField(max_length=60, blank=True, null=True)
+    street_address_2 = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         managed = False
