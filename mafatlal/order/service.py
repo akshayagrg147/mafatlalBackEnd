@@ -262,3 +262,80 @@ def order_list_logic(data):
         print(f"Error at order list api {str(e)}")
         return False, None, str(e)
 
+def order_stats_logic(data):
+    try:
+        # Initialize totals
+        total_profit = 0.0
+        total_sale = 0.0
+
+        # Extract user ID from data
+        user_id = data.get('user_id')
+        if not user_id:
+            raise ValueError("User can't be none")
+        
+        # Fetch the user object
+        user_obj = TblUser.objects.filter(id=user_id).first()
+        if not user_obj:
+            raise ValueError("No user found")
+        
+        # Extract or set default dates
+        from_date = data.get('from', datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0))
+        to_date = data.get('to', datetime.datetime.now(datetime.timezone.utc))
+        
+        # Extract or set default order status
+        order_status = data.get('status')
+        
+        # Filter the orders based on the status if provided
+        filter_args = {
+            'user_id': user_id,
+            'created_on__gt': from_date,
+            'created_on__lt': to_date
+        }
+        
+        if order_status:
+            filter_args['order_status'] = order_status
+        
+        # Calculate total sale count    
+        order_objs = TblOrder.objects.filter(**filter_args).all()
+
+        # Calculate total profit
+        statistics = {}
+        for order in order_objs:
+            date_key = order.created_on.strftime("%Y-%m-%d")
+            
+            total_profit += float(order.price)
+            
+            if date_key not in statistics:
+                statistics[date_key] = []
+            
+            statistics[date_key].append({
+                "orderId": order.id,
+                "orderValue": order.price,
+                "createdAt": order.created_on
+            })
+            
+        
+        total_sale = len(order_objs)
+        total_profit = total_profit
+            
+        # Prepare the final response
+        final_response = {
+            "Total Sale": total_sale,
+            "Total Profit": total_profit,
+            "statistics": statistics
+        }
+        
+        return True, final_response, "Order stats fetched successfully"
+    
+    except ValueError as ve:
+        print(f"Error at order stats api: {str(ve)}")
+        return False, None, str(ve)
+    
+    except Exception as e:
+        print(f"Error at order stats api: {str(e)}")
+        return False, None, str(e)
+    
+
+
+
+

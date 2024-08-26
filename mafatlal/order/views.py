@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
-from order.service import order_history_logic, order_place_logic, order_details_logic, order_status_update_logic, order_list_logic
+from order.service import order_history_logic, order_place_logic, order_details_logic, order_status_update_logic, order_list_logic, order_stats_logic
 
 # Create your views here.
 @api_view(['GET'])
@@ -54,7 +54,7 @@ def order_status(request):
 @api_view(['GET'])
 def order_list(request):
     print(constants.BREAKCODE)
-    print(constants.INITAITED_PLACE_ORDER_API)
+    print(constants.INITAITED_PLACE_LIST_API)
     
     data = request.query_params
     
@@ -62,6 +62,16 @@ def order_list(request):
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
 
+@api_view(["GET"])
+def order_stats(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_ORDER_STATS_API)
+    
+    data = request.query_params
+    
+    status, response_data, message = order_stats_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
 
     
 # @api_view(['POST'])
