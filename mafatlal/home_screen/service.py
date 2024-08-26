@@ -18,10 +18,9 @@ def home_screen_logic(user_id):
         if not user_obj:
             return 'Error', None, "User not found"
         
-        user_state = user_obj.state
         categories_info = []
         
-        all_categories = TblCategories.objects.filter(state = user_state).all()
+        all_categories = TblCategories.objects.all()
         
         for categories in all_categories:
             category = {
@@ -289,3 +288,45 @@ def address_updation_logic(data):
     except Exception as e:
         print(f"Error in the address_insertion_logic as {str(e)}")
         return 'Error', None, str(e)
+    
+def search_category_logic(data):
+    try:
+        final_response = {}
+        categories_info = [] 
+        
+        search_string = data['search'] if 'search' in data else None
+        
+        if not search_string:
+            raise Exception("Search string can't be null")
+        
+        
+        all_categories = TblCategories.objects.filter(categories_name__icontains=search_string).all()
+        
+        for categories in all_categories:
+            category = {
+                "id"            : categories.id,
+                "name"          : categories.categories_name,
+                "img"           : categories.image,
+                "sub_categories": handle_sub_categories(categories.id)
+            }
+            
+            categories_info.append(category)
+            
+            
+        final_response['categories'] = categories_info
+        
+        products_info = handle_product_info()
+        
+        final_response['products'] = products_info
+        
+        return 'Success', final_response, "All categories found successfully"
+            
+        
+    except Exception as e:
+        print(constants.BREAKCODE)
+        print(f"!!! ERROR !!! Error with the search_category_logicc :- {str(e)} ##################")
+
+        return 'Error', None, str(e)
+    
+    
+    
