@@ -4,7 +4,7 @@ from home_screen.models import TblAddress
 from mafatlal import api_serializer
 from home_screen.service import product_info_logic
 from django.core import serializers as json_serializer
-import ast, datetime, json
+import ast, datetime, json, math
 
 
 def order_history_logic(data):
@@ -425,7 +425,7 @@ def order_list_logic(data):
             
         total_orders = len(orders_objs)
         limit = 20*int(page) if 20*int(page) - total_orders < 0 else total_orders
-        
+        total_pages = math.ceil(total_orders/20)
         for flag in range(20*(int(page)-1), limit):
             customer_obj = TblUser.objects.filter(id = orders_objs[flag].user_id).first()
             response = {
@@ -469,16 +469,16 @@ def order_list_logic(data):
                                         }
             
             final_response.append(response)
-        return True, final_response, "Order list fetch successfully"
+        return True, total_pages, final_response, "Order list fetch successfully"
         
     
     except ValueError as ve:
         print(f"Error at order list api {str(ve)}")
-        return False, None, str(ve)
+        return False, None,  None, str(ve)
     
     except Exception as e:
         print(f"Error at order list api {str(e)}")
-        return False, None, str(e)
+        return False, None,  None, str(e)
 
 def order_stats_logic(data):
     try:

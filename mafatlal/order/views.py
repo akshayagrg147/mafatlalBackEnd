@@ -58,9 +58,9 @@ def order_list(request):
     
     data = request.query_params
     
-    status, response_data, message = order_list_logic(data)
+    status, pages, response_data, message = order_list_logic(data)
     
-    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+    return JsendSuccessResponse(status = status, pages = pages, data = response_data, message=message).get_response()
 
 @api_view(["GET"])
 def order_stats(request):
