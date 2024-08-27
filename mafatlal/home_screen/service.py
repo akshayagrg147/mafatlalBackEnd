@@ -70,8 +70,7 @@ def handle_sub_categories(cat_id=None):
 def handle_product_info():
     final_response = []
     products_obj = TblProducts.objects.select_related('product_category').filter(
-    product_category__categories_name='Global',
-    product_category__state='Global'
+    product_category__categories_name='Global'
     )
     
     if products_obj:
