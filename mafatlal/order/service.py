@@ -288,14 +288,18 @@ def order_details_logic(order_id):
                                     "city"              : order_object.billing_address.city if order_object.billing_address else ""
                                     }
         
-        final_response['order_id']      = order_object.id
-        final_response['user_id']       = order_object.user_id
-        final_response['price']         = order_object.price
-        final_response['products']      = product_details
-        final_response['quantity']      = order_object.product_quantity
-        final_response['order_status']  = order_object.order_status
-        final_response['order_placed']  = order_object.created_on
-        final_response['tracking_url']  = order_object.tracking_url
+        user_obj = TblUser.objects.filter(id = order_object.user_id).first()
+        
+        final_response['order_id']       = order_object.id
+        final_response['user_id']        = order_object.user_id
+        final_response['customer_name']  = user_obj.full_name if user_obj else ""
+        final_response['customer_email'] = user_obj.email if user_obj else ""
+        final_response['price']          = order_object.price
+        final_response['products']       = product_details
+        final_response['quantity']       = order_object.product_quantity
+        final_response['order_status']   = order_object.order_status
+        final_response['order_placed']   = order_object.created_on
+        final_response['tracking_url']   = order_object.tracking_url
         
         return True, final_response, "Order placed successfully"
     
