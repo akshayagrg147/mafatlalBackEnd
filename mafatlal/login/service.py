@@ -158,3 +158,57 @@ def login_check(data):
 def generate_salt_key(length=10):
     characters = string.ascii_uppercase + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
+
+def user_info_logic(user_id):
+    try:
+        if not user_id:
+            return 'Error', None, "User_id can't be null"
+        
+        user_obj = TblUser.objects.filter(id=user_id).first()
+        
+        response_obj = {
+            "id"                : user_obj.id,
+            "email"             : user_obj.email,
+            "full_name"         : user_obj.full_name,
+            "password"          : user_obj.password,
+            "salt_key"          : user_obj.salt_key,
+            "state"             : user_obj.state,
+            "district"          : user_obj.district,
+            "user_type"         : user_obj.user_type,
+            "gst_number"        : user_obj.gst_number,
+            "shipping"          : None,
+            "billing"           : None,
+            "created_on"        : user_obj.created_on,
+            "updated_on"        : user_obj.updated_on,
+            "updated_by"        : user_obj.updated_by,
+            "updated_on"        : user_obj.updated_on,
+        }
+        if user_obj.shipping_address:
+            response_obj['shipping'] = {
+                                    "landmark"          : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
+                                    "state"             : user_obj.shipping_address.state if user_obj.shipping_address else "",
+                                    "district"          : user_obj.shipping_address.district if user_obj.shipping_address else "",
+                                    "street_address_1"  : user_obj.shipping_address.street_address_1 if user_obj.shipping_address else "",
+                                    "street_address_2"  : user_obj.shipping_address.street_address_2 if user_obj.shipping_address else "",
+                                    "pincode"           : user_obj.shipping_address.pincode if user_obj.shipping_address else "",
+                                    "city"              : user_obj.shipping_address.city if user_obj.shipping_address else ""
+                                        }
+        if user_obj.billing_address:
+            response_obj['billing'] = {
+                                    "landmark"          : user_obj.billing_address.landmark if user_obj.billing_address else "",
+                                    "state"             : user_obj.billing_address.state if user_obj.billing_address else "",
+                                    "district"          : user_obj.billing_address.district if user_obj.billing_address else "",
+                                    "street_address_1"  : user_obj.billing_address.street_address_1 if user_obj.billing_address else "",
+                                    "street_address_2"  : user_obj.billing_address.street_address_2 if user_obj.billing_address else "",
+                                    "pincode"           : user_obj.billing_address.pincode if user_obj.billing_address else "",
+                                    "city"              : user_obj.billing_address.city if user_obj.billing_address else ""
+                                    }
+        
+        return True, response_obj, 'success'
+        
+        
+    except Exception as e:
+        print(constants.BREAKCODE)
+        print(f"!!! ERROR !!! Error with the register user :- {str(e)} ##################")
+
+        return False, None, str(e)

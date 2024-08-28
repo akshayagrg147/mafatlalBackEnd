@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
-from .service import login_check, register_user
+from .service import login_check, register_user, user_info_logic
 from mafatlal import constants
 
 @api_view(['POST'])
@@ -21,5 +21,16 @@ def user_login(request):
 
     data = request.data
     status, response_data, message = login_check(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def user_info(request):
+    print(constants.BREAKCODE)
+    print(constants.INITIATED_USER_INFO_API)
+
+    data = request.query_params
+    user_id = data['user_id'] if 'user_id' in data else None
+    status, response_data, message = user_info_logic(user_id)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
