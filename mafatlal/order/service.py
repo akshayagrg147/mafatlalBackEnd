@@ -39,23 +39,26 @@ def order_history_logic(data):
             }
             if order.shipping_address:
                 response['shipping'] = {
-                                        "landmark"  : order.shipping_address.landmark if order.shipping_address else "",
-                                        "state"     : order.shipping_address.state if order.shipping_address else "",
-                                        "district"  : order.shipping_address.district if order.shipping_address else "",
+                                        "landmark"          : order.shipping_address.landmark if order.shipping_address else "",
+                                        "state"             : order.shipping_address.state if order.shipping_address else "",
+                                        "district"          : order.shipping_address.district if order.shipping_address else "",
                                         "street_address_1"  : order.shipping_address.street_address_1 if order.shipping_address else "",
                                         "street_address_2"  : order.shipping_address.street_address_2 if order.shipping_address else "",
-                                        "pincode"   : order.shipping_address.pincode if order.shipping_address else "",
-                                        "city"      : order.shipping_address.city if order.shipping_address else ""
+                                        "pincode"           : order.shipping_address.pincode if order.shipping_address else "",
+                                        "city"              : order.shipping_address.city if order.shipping_address else "",
+                                        "phone_number"      : order.shipping_address.phone_number if order.shipping_address else ""
+                                        
                                             }
             if order.billing_address:
                 response['billing'] = {
-                                        "landmark"  : order.billing_address.landmark if order.billing_address else "",
-                                        "state"     : order.billing_address.state if order.billing_address else "",
-                                        "district"  : order.billing_address.district if order.billing_address else "",
+                                        "landmark"          : order.billing_address.landmark if order.billing_address else "",
+                                        "state"             : order.billing_address.state if order.billing_address else "",
+                                        "district"          : order.billing_address.district if order.billing_address else "",
                                         "street_address_1"  : order.billing_address.street_address_1 if order.billing_address else "",
                                         "street_address_2"  : order.billing_address.street_address_2 if order.billing_address else "",
-                                        "pincode"   : order.billing_address.pincode if order.billing_address else "",
-                                        "city"      : order.billing_address.city if order.billing_address else ""
+                                        "pincode"           : order.billing_address.pincode if order.billing_address else "",
+                                        "city"              : order.billing_address.city if order.billing_address else "",
+                                        "phone_number"      : order.billing_address.phone_number if order.billing_address else ""
                                         }
             
             final_response.append(response)
@@ -104,6 +107,7 @@ def order_place_logic(data):
                 address_2       = shipping_address['street_address_2'] if 'street_address_2' in shipping_address else ''
                 pincode         = shipping_address['pincode'] if 'pincode' in shipping_address else ''
                 city            = shipping_address['city'] if 'city' in shipping_address else ''
+                phone_number    = shipping_address['phone_number'] if 'phone_number' in shipping_address else ''
                 
                 shipping_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "shipping").first()
                 
@@ -115,6 +119,7 @@ def order_place_logic(data):
                     shipping_obj.pincode = pincode
                     shipping_obj.city = city
                     shipping_obj.street_address_2 = address_2
+                    shipping_obj.phone_number = phone_number
                     
                     shipping_obj.save()
                 
@@ -127,7 +132,8 @@ def order_place_logic(data):
                                               street_address_1 = address_1,
                                               pincode = pincode,
                                               city = city,
-                                              street_address_2 = address_2)
+                                              street_address_2 = address_2,
+                                              phone_number = phone_number)
                     
                     shipping_obj.save()
                     
@@ -145,6 +151,7 @@ def order_place_logic(data):
                 address_2       = billing_address['street_address_2'] if 'street_address_2' in billing_address else ''
                 pincode         = billing_address['pincode'] if 'pincode' in billing_address else ''
                 city            = billing_address['city'] if 'city' in billing_address else ''
+                phone_number    = billing_address['phone_number'] if 'phone_number' in billing_address else ''
                 
                 billing_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "billing").first()
                 
@@ -156,6 +163,7 @@ def order_place_logic(data):
                     billing_obj.pincode = pincode
                     billing_obj.city = city
                     billing_obj.street_address_2 = address_2
+                    billing_obj.phone_number = phone_number
                     
                     billing_obj.save()
                 
@@ -168,7 +176,8 @@ def order_place_logic(data):
                                               street_address_1 = address_1,
                                               pincode = pincode,
                                               city = city,
-                                              street_address_2 = address_2)
+                                              street_address_2 = address_2,
+                                              phone_number = phone_number)
                     
                     billing_obj.save()
                     
@@ -212,7 +221,8 @@ def order_place_logic(data):
                                     "street_address_1"  : order_obj.shipping_address.street_address_1 if order_obj.shipping_address else "",
                                     "street_address_2"  : order_obj.shipping_address.street_address_2 if order_obj.shipping_address else "",
                                     "pincode"   : order_obj.shipping_address.pincode if order_obj.shipping_address else "",
-                                    "city"      : order_obj.shipping_address.city if order_obj.shipping_address else ""
+                                    "city"      : order_obj.shipping_address.city if order_obj.shipping_address else "",
+                                    "phone_number": order_obj.shipping_address.phone_number if order_obj.shipping_address else ""
                                         }
         if order_obj.billing_address:
             response['billing'] = {
@@ -222,7 +232,8 @@ def order_place_logic(data):
                                     "street_address_1"  : order_obj.billing_address.street_address_1 if order_obj.billing_address else "",
                                     "street_address_2"  : order_obj.billing_address.street_address_2 if order_obj.billing_address else "",
                                     "pincode"   : order_obj.billing_address.pincode if order_obj.billing_address else "",
-                                    "city"      : order_obj.billing_address.city if order_obj.billing_address else ""
+                                    "city"      : order_obj.billing_address.city if order_obj.billing_address else "",
+                                    "phone_number": order_obj.billing_address.phone_number if order_obj.billing_address else ""
                                     }
         
         return True, response, "Order placed successfully"
@@ -275,7 +286,8 @@ def order_details_logic(order_id):
                                     "street_address_1"  : order_object.shipping_address.street_address_1 if order_object.shipping_address else "",
                                     "street_address_2"  : order_object.shipping_address.street_address_2 if order_object.shipping_address else "",
                                     "pincode"           : order_object.shipping_address.pincode if order_object.shipping_address else "",
-                                    "city"              : order_object.shipping_address.city if order_object.shipping_address else ""
+                                    "city"              : order_object.shipping_address.city if order_object.shipping_address else "",
+                                    "phone_number"      : order_object.shipping_address.phone_number if order_object.shipping_address else ""
                                         }
         if order_object.billing_address:
             final_response['billing'] = {
@@ -285,7 +297,8 @@ def order_details_logic(order_id):
                                     "street_address_1"  : order_object.billing_address.street_address_1 if order_object.billing_address else "",
                                     "street_address_2"  : order_object.billing_address.street_address_2 if order_object.billing_address else "",
                                     "pincode"           : order_object.billing_address.pincode if order_object.billing_address else "",
-                                    "city"              : order_object.billing_address.city if order_object.billing_address else ""
+                                    "city"              : order_object.billing_address.city if order_object.billing_address else "",
+                                    "phone_number"      : order_object.billing_address.phone_number if order_object.billing_address else ""
                                     }
         
         user_obj = TblUser.objects.filter(id = order_object.user_id).first()
@@ -365,7 +378,8 @@ def order_status_update_logic(data):
                                     "street_address_1"  : order_object.shipping_address.street_address_1 if order_object.shipping_address else "",
                                     "street_address_2"  : order_object.shipping_address.street_address_2 if order_object.shipping_address else "",
                                     "pincode"   : order_object.shipping_address.pincode if order_object.shipping_address else "",
-                                    "city"      : order_object.shipping_address.city if order_object.shipping_address else ""
+                                    "city"      : order_object.shipping_address.city if order_object.shipping_address else "",
+                                    "phone_number"      : order_object.shipping_address.phone_number if order_object.shipping_address else ""
                                         }
         if order_object.billing_address:
             response['billing'] = {
@@ -375,7 +389,8 @@ def order_status_update_logic(data):
                                     "street_address_1"  : order_object.billing_address.street_address_1 if order_object.billing_address else "",
                                     "street_address_2"  : order_object.billing_address.street_address_2 if order_object.billing_address else "",
                                     "pincode"   : order_object.billing_address.pincode if order_object.billing_address else "",
-                                    "city"      : order_object.billing_address.city if order_object.billing_address else ""
+                                    "city"      : order_object.billing_address.city if order_object.billing_address else "",
+                                    "phone_number"      : order_object.billing_address.phone_number if order_object.billing_address else ""
                                     }
         
         return True, response, "Order status updated successfully"
@@ -459,7 +474,8 @@ def order_list_logic(data):
                                         "street_address_1"  : orders_objs[flag].shipping_address.street_address_1 if orders_objs[flag].shipping_address else "",
                                         "street_address_2"  : orders_objs[flag].shipping_address.street_address_2 if orders_objs[flag].shipping_address else "",
                                         "pincode"           : orders_objs[flag].shipping_address.pincode if orders_objs[flag].shipping_address else "",
-                                        "city"              : orders_objs[flag].shipping_address.city if orders_objs[flag].shipping_address else ""
+                                        "city"              : orders_objs[flag].shipping_address.city if orders_objs[flag].shipping_address else "",
+                                        "phone_number"      : orders_objs[flag].shipping_address.phone_number if orders_objs[flag].billing_address else ""
                                             }
             if orders_objs[flag].billing_address:
                 response['billing'] = {
@@ -469,7 +485,8 @@ def order_list_logic(data):
                                         "street_address_1"  : orders_objs[flag].billing_address.street_address_1 if orders_objs[flag].billing_address else "",
                                         "street_address_2"  : orders_objs[flag].billing_address.street_address_2 if orders_objs[flag].billing_address else "",
                                         "pincode"           : orders_objs[flag].billing_address.pincode if orders_objs[flag].billing_address else "",
-                                        "city"              : orders_objs[flag].billing_address.city if orders_objs[flag].billing_address else ""
+                                        "city"              : orders_objs[flag].billing_address.city if orders_objs[flag].billing_address else "",
+                                        "phone_number"      : orders_objs[flag].billing_address.phone_number if orders_objs[flag].billing_address else ""
                                         }
             
             final_response.append(response)

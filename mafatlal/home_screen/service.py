@@ -106,8 +106,8 @@ def product_info_logic(product_id):
         product_obj = TblProducts.objects.filter(id = int(product_id)).first()
         
         if product_obj:
-            product_category = TblCategories.objects.filter(id = int(product_obj.product_category.id)).first()
-            product_sub_category = TblSubcategories.objects.filter(id = int(product_obj.product_sub_category)).first()
+            product_category = TblCategories.objects.filter(id = int(product_obj.product_category_id)).first()
+            product_sub_category = TblSubcategories.objects.filter(id = int(product_obj.product_sub_category_id)).first()
             final_response['id']                        = product_id
             final_response['name']                      = product_obj.product_name
             final_response['product_category']          = product_category.categories_name
@@ -202,30 +202,47 @@ def address_insertion_logic(data):
                 address_2       = value['street_address_2'] if 'street_address_2' in value else ''
                 pincode         = value['pincode'] if 'pincode' in value else ''
                 city            = value['city'] if 'city' in value else ''
+                phone_number    = value['phone_number'] if 'phone_number' in value else ''
 
-                address_obj = TblAddress(user_id = user_id,
-                                        address_type = address_type,
-                                        landmark = landmark,
-                                        state = state,
-                                        district = district,
-                                        street_address_1 = address_1,
-                                        street_address_2 = address_2,
-                                        pincode = pincode, 
-                                        city = city
-                                        )
+                address_obj = TblAddress.objects.filter(user_id = user_id,address_type = address_type).first()
+                if address_obj:
+                    address_obj.address_type        = address_type if address_type else address_obj.address_type
+                    address_obj.landmark            = landmark if landmark else address_obj.landmark
+                    address_obj.state               = state if state else address_obj.state
+                    address_obj.district            = district if district else address_obj.district
+                    address_obj.street_address_1    = address_1 if address_1 else address_obj.street_address_1
+                    address_obj.street_address_2    = address_2 if address_2 else address_obj.street_address_2
+                    address_obj.pincode             = pincode if pincode else address_obj.pincode
+                    address_obj.city                = city if city else address_obj.city
+                    address_obj.phone_number        = phone_number if phone_number else address_obj.phone_number
+
+                    address_obj.save()
+                    
+                else:
+                    address_data = TblAddress(user_id = user_id,
+                                            address_type = address_type,
+                                            landmark = landmark,
+                                            state = state,
+                                            district = district,
+                                            street_address_1 = address_1,
+                                            street_address_2 = address_2,
+                                            pincode = pincode, 
+                                            city = city,
+                                            phone_number = phone_number)
+                    
+                    address_data.save()
                 
-                address_obj.save()
-            
-                address_data = TblAddress.objects.filter(user_id = user_id, address_type = address_type).first()
+                    address_obj = TblAddress.objects.filter(user_id = user_id, address_type = address_type).first()
                 
-                response_obj[f'{address_type}_id']                  = address_data.id
-                response_obj[f'{address_type}_landmark']            = address_data.landmark
-                response_obj[f'{address_type}_street_address_1']    = address_data.street_address_1
-                response_obj[f'{address_type}_street_address_2']    = address_data.street_address_2
-                response_obj[f'{address_type}_state']               = address_data.state
-                response_obj[f'{address_type}_district']            = address_data.district
-                response_obj[f'{address_type}_pincode']             = address_data.pincode
-                response_obj[f'{address_type}_city']                = address_data.city
+                response_obj[f'{address_type}_id']                  = address_obj.id
+                response_obj[f'{address_type}_landmark']            = address_obj.landmark
+                response_obj[f'{address_type}_street_address_1']    = address_obj.street_address_1
+                response_obj[f'{address_type}_street_address_2']    = address_obj.street_address_2
+                response_obj[f'{address_type}_state']               = address_obj.state
+                response_obj[f'{address_type}_district']            = address_obj.district
+                response_obj[f'{address_type}_pincode']             = address_obj.pincode
+                response_obj[f'{address_type}_city']                = address_obj.city
+                response_obj[f'{address_type}_phone_number']        = address_obj.phone_number
                 
                 user_obj = TblUser.objects.filter(id = user_id).first()
                 if address_type == 'billing':
@@ -276,6 +293,7 @@ def address_updation_logic(data):
             f"{address_type}_street_address_2"  : address_data.street_address_2,
             f"{address_type}_pincode"           : address_data.pincode,
             f"{address_type}_city"              : address_data.city,
+            f"{address_type}_phone_number"      : address_data.phone_number,
         }
         
         return 'Success', response_obj, 'Address Updated successfully'
