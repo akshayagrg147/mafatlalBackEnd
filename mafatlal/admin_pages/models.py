@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
 class TblCategories(models.Model):
     categories_name = models.CharField(max_length=75)
     state = models.CharField(max_length=75)
@@ -19,10 +19,11 @@ class TblSubcategories(models.Model):
     image = models.CharField(max_length=100, blank=True, null=True)
     created_by = models.BigIntegerField(blank=True, null=True)
     updated_by = models.BigIntegerField(blank=True, null=True)
-    
+
     class Meta:
         managed = False
         db_table = 'tbl_subcategories'
+        
         
 class TblProducts(models.Model):
     product_name = models.CharField(max_length=75)
@@ -41,17 +42,6 @@ class TblProducts(models.Model):
         managed = False
         db_table = 'tbl_products'
         
-class TblAddress(models.Model):
-    user_id = models.BigIntegerField(blank=True, null=True)
-    address_type = models.CharField(max_length=50)
-    landmark = models.CharField(max_length=50, blank=True, null=True)
-    state = models.CharField(max_length=75, blank=True, null=True)
-    district = models.CharField(max_length=75, blank=True, null=True)
-    street_address_1 = models.CharField(max_length=100, blank=True, null=True)
-    pincode = models.CharField(max_length=50, blank=True, null=True)
-    city = models.CharField(max_length=60, blank=True, null=True)
-    street_address_2 = models.CharField(max_length=100, blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'tbl_address'
+        
+        

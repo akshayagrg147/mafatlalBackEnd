@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'login',
     'home_screen',
-    'order'
+    'order',
+    'admin_pages',
 ]
 
 MIDDLEWARE = [

@@ -14,4 +14,19 @@ INITAITED_ORDER_STATS_API       = "Initaited the order details api"
 INITAITED_ADDRESS_INSERT_API    = "Initaited Address insert api"
 INITAITED_ADDRESS_UPDATE_API    = "Initaited Address update api"
 
+INITIATED_ORGANIZATION_FETCH    = "Initaited the organization fetch api"
+INITIATED_ORGANIZATION_ADD      = "Initaited the organization add api"
+INITIATED_ORGANIZATION_UPDATE   = "Initaited the organization update api"
+INITIATED_ORGANIZATION_DELETE   = "Initaited the organization delete api"
+
+INITIATED_SUB_CATEGORY_FETCH    = "Initaited the sub_category fetch api"
+INITIATED_SUB_CATEGORY_ADD      = "Initaited the sub_category add api"
+INITIATED_SUB_CATEGORY_UPDATE   = "Initaited the sub_category update api"
+INITIATED_SUB_CATEGORY_DELETE   = "Initaited the sub_category delete api"
+
+INITIATED_PRODUCTS_FETCH        = "Initaited the products fetch api"
+INITIATED_PRODUCTS_ADD          = "Initaited the products add api"
+INITIATED_PRODUCTS_UPDATE       = "Initaited the products update api"
+INITIATED_PRODUCTS_DELETE       = "Initaited the products delete api"
+
 ERROR_MESSAGE           = "Invalid_Request"
