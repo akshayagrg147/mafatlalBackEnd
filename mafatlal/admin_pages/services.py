@@ -383,22 +383,33 @@ def add_products(user_id, data):
             serializer.is_valid(raise_exception=True)
             
             product_name = obj.get('name')
-            product_category = int(obj.get('organization'))
-            product_sub_category = int(obj.get('sub_category'))
+            product_category = obj.get('organization')
+            product_sub_category = obj.get('sub_category')
             price = obj.get('price')
             description = obj.get('description')
             product_image = obj.get('image')
             size = obj['size'] if 'size' in obj else {}
             
+            if product_category and product_sub_category:
+                organization_object = TblCategories.objects.filter(id=product_category).first()
+                sub_category_object = TblSubcategories.objects.filter(id=product_sub_category).first()
+            
+            
+            if not product_category:
+                organization_object = TblCategories.objects.filter(id = 9).first()
+                product_category = organization_object.id
+                
+            if not product_sub_category:
+                sub_category_object = TblSubcategories.objects.filter(id=8).first()
+                product_sub_category = sub_category_object.id
+            
+                
             product_object = TblProducts.objects.filter(
                 product_category=product_category,
                 product_sub_category=product_sub_category,
                 product_name=product_name,
                 created_by=user_id
             ).first()
-            
-            organization_object = TblCategories.objects.filter(id=product_category).first()
-            sub_category_object = TblSubcategories.objects.filter(id=product_sub_category).first()
 
             if not organization_object:
                 err_message = f"Error: Category with id {product_category} not found"

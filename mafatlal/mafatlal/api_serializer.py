@@ -22,6 +22,4 @@ class address_update_serializer(serializers.Serializer):
     
 class add_products_serializer(serializers.Serializer):
     name                 = serializers.CharField()
-    organization         = serializers.IntegerField()
-    sub_category         = serializers.IntegerField()
     image                = serializers.CharField()
