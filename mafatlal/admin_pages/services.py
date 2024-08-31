@@ -159,9 +159,10 @@ def delete_orgs(data):
 
 
 
-def get_sub_category(user_id):
+def get_sub_category(data):
     try:
         final_response = []
+        user_id = data.get('user_id')
         if not user_id:
             raise Exception("User is null")
         
@@ -169,7 +170,12 @@ def get_sub_category(user_id):
         if not user_obj:
             raise Exception("User is not present")
         
-        sub_category_obj = TblSubcategories.objects.all()
+        organization = data.get('organization')
+        if organization:
+            sub_category_obj = TblSubcategories.objects.filter(category = organization).all()
+        
+        else:
+            sub_category_obj = TblSubcategories.objects.all()
         
         for sub_obj in sub_category_obj:
             response = {
@@ -318,9 +324,10 @@ def delete_sub_category(data):
         return False, {}, str(e)
 
 
-def get_products(user_id):
+def get_products(data):
     try:
         final_response = []
+        user_id = data.get('user_id')
         if not user_id:
             raise Exception("User is null")
         
@@ -328,7 +335,20 @@ def get_products(user_id):
         if not user_obj:
             raise Exception("User is not present")
         
-        products_obj = TblProducts.objects.all()
+        organization = data.get("organization")
+        sub_category = data.get('sub_catogory')
+        
+        if organization and sub_category:
+            products_obj = TblProducts.objects.filter(product_category = organization, product_sub_category = sub_category).all()
+            
+        elif organization:
+            products_obj = TblProducts.objects.filter(product_category = organization).all()
+        
+        elif sub_category:
+            products_obj = TblProducts.objects.filter(product_sub_category = sub_category).all()
+            
+        else:
+            products_obj = TblProducts.objects.all()
         
         for product_object in products_obj:
             response = {

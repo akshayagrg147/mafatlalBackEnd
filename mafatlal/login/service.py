@@ -62,6 +62,7 @@ def register_user(data):
         }
         if user_obj.shipping_address:
             response_obj['shipping'] = {
+                                    "id"                : user_obj.shipping_address_id if user_obj.shipping_address else "",
                                     "landmark"          : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
                                     "state"             : user_obj.shipping_address.state if user_obj.shipping_address else "",
                                     "district"          : user_obj.shipping_address.district if user_obj.shipping_address else "",
@@ -72,6 +73,7 @@ def register_user(data):
                                         }
         if user_obj.billing_address:
             response_obj['billing'] = {
+                                    "id"                : user_obj.billing_address_id if user_obj.billing_address else "",
                                     "landmark"          : user_obj.billing_address.landmark if user_obj.billing_address else "",
                                     "state"             : user_obj.billing_address.state if user_obj.billing_address else "",
                                     "district"          : user_obj.billing_address.district if user_obj.billing_address else "",
@@ -125,23 +127,25 @@ def login_check(data):
             
             if user_obj.shipping_address:
                 response_obj['shipping'] = {
-                                        "landmark"  : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
-                                        "state"     : user_obj.shipping_address.state if user_obj.shipping_address else "",
-                                        "district"  : user_obj.shipping_address.district if user_obj.shipping_address else "",
+                                        "id"                : user_obj.shipping_address_id if user_obj.shipping_address else "",
+                                        "landmark"          : user_obj.shipping_address.landmark if user_obj.shipping_address else "",
+                                        "state"             : user_obj.shipping_address.state if user_obj.shipping_address else "",
+                                        "district"          : user_obj.shipping_address.district if user_obj.shipping_address else "",
                                         "street_address_1"  : user_obj.shipping_address.street_address_1 if user_obj.shipping_address else "",
                                         "street_address_2"  : user_obj.shipping_address.street_address_2 if user_obj.shipping_address else "",
-                                        "pincode"   : user_obj.shipping_address.pincode if user_obj.shipping_address else "",
-                                        "city"      : user_obj.shipping_address.city if user_obj.shipping_address else ""
+                                        "pincode"           : user_obj.shipping_address.pincode if user_obj.shipping_address else "",
+                                        "city"              : user_obj.shipping_address.city if user_obj.shipping_address else ""
                                             }
             if user_obj.billing_address:
                 response_obj['billing'] = {
-                                        "landmark"  : user_obj.billing_address.landmark if user_obj.billing_address else "",
-                                        "state"     : user_obj.billing_address.state if user_obj.billing_address else "",
-                                        "district"  : user_obj.billing_address.district if user_obj.billing_address else "",
+                                        "id"                : user_obj.billing_address_id if user_obj.billing_address else "",
+                                        "landmark"          : user_obj.billing_address.landmark if user_obj.billing_address else "",
+                                        "state"             : user_obj.billing_address.state if user_obj.billing_address else "",
+                                        "district"          : user_obj.billing_address.district if user_obj.billing_address else "",
                                         "street_address_1"  : user_obj.billing_address.street_address_1 if user_obj.billing_address else "",
                                         "street_address_2"  : user_obj.billing_address.street_address_2 if user_obj.billing_address else "",
-                                        "pincode"   : user_obj.billing_address.pincode if user_obj.billing_address else "",
-                                        "city"      : user_obj.billing_address.city if user_obj.billing_address else ""
+                                        "pincode"           : user_obj.billing_address.pincode if user_obj.billing_address else "",
+                                        "city"              : user_obj.billing_address.city if user_obj.billing_address else ""
                                         }
             
             return True, response_obj, 'Success'

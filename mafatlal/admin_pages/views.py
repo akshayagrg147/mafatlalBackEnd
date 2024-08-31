@@ -65,10 +65,8 @@ class Sub_Category(APIView):
         print(constants.INITIATED_SUB_CATEGORY_FETCH)
         
         data = request.query_params
-        
-        user_id = data.get('user_id')
                 
-        status, response_data, message = get_sub_category(user_id)
+        status, response_data, message = get_sub_category(data)
         
         return JsendSuccessResponse(status = status,data = response_data, message=message).get_response() 
     
@@ -118,9 +116,8 @@ class Products(APIView):
         print(constants.INITIATED_PRODUCTS_FETCH)
         
         data = request.query_params
-        user_id = data['user_id'] if 'user_id' in data else None
         
-        status, response_data, message = get_products(user_id)
+        status, response_data, message = get_products(data)
         
         return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
     
