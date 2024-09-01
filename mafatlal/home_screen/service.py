@@ -137,7 +137,7 @@ def sub_catproduct_info_logic(sub_catid):
             for obj in products_obj:
                 response = {}
                 
-                product_sub_category = TblSubcategories.objects.filter(id = int(obj.product_sub_category)).first()
+                product_sub_category = TblSubcategories.objects.filter(id = int(obj.product_sub_category_id)).first()
                 
                 category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
                 size_dict = obj.__dict__['size_available']

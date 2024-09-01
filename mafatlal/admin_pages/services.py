@@ -336,7 +336,7 @@ def get_products(data):
             raise Exception("User is not present")
         
         organization = data.get("organization")
-        sub_category = data.get('sub_catogory')
+        sub_category = data.get('sub_category')
         
         if organization and sub_category:
             products_obj = TblProducts.objects.filter(product_category = organization, product_sub_category = sub_category).all()
