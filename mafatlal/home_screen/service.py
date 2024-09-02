@@ -10,13 +10,13 @@ import json, ast
 def home_screen_logic(user_id):
     try:
         final_response = {}
-        if not user_id:
-            return 'Error', None, "User_id can't be null"
+        # if not user_id:
+        #     return 'Error', None, "User_id can't be null"
         
-        user_obj = TblUser.objects.filter(id = user_id).first()
+        # user_obj = TblUser.objects.filter(id = user_id).first()
         
-        if not user_obj:
-            return 'Error', None, "User not found"
+        # if not user_obj:
+        #     return 'Error', None, "User not found"
         
         categories_info = []
         
