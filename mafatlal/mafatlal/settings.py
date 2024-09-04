@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # This should be at the top, before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware', # This should be at the top, before CommonMiddleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -69,10 +69,11 @@ ROOT_URLCONF = 'mafatlal.urls'
 CORS_ALLOWED_ORIGINS = [
     "https://online.mafatlals.com",
 ]
-
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'access-control-allow-origin',
 ]
+CORS_ALLOW_CREDENTIALS = True  # If you are using credentials
+
 
 TEMPLATES = [
     {
