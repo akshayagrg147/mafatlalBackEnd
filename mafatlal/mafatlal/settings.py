@@ -21,7 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--_jktr33yt3mi6k#%p8_+smvkr*zw7q60#eflqcan$g(p5dz(*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = False
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = [
     "eapi.vridhee.com",
@@ -65,10 +68,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
-    'authorization',
-    'content-type',
-    'x-csrf-token',
-    'x-requested-with',
+    'Authorization',
+    'Content-Type',
+    'X-CSRF-Token',
+    'X-Requested-With',
 ]
 
 CORS_ALLOW_METHODS = [
