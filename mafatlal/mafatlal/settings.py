@@ -17,10 +17,6 @@ from corsheaders.defaults import default_headers
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure--_jktr33yt3mi6k#%p8_+smvkr*zw7q60#eflqcan$g(p5dz(*'
 
@@ -34,11 +30,9 @@ ALLOWED_HOSTS = [
     "localhost"
 ]
 
-
 # Application definition
-
 INSTALLED_APPS = [
-    'corsheaders' ,
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,20 +59,27 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mafatlal.urls'
 
-# CORS_ALLOWED_ORIGINS = [
-#     "https://online.mafatlals.com"
-# ]
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "https://online.mafatlals.com"
+]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
-    'access-control-allow-origin',
-    'authorization',  # Include any other headers your client is sending
+    'authorization',
     'content-type',
     'x-csrf-token',
     'x-requested-with',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_METHODS = ['DELETE','GET','OPTIONS','PATCH','POST','PUT']
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
@@ -99,26 +100,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mafatlal.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-
 DATABASES = {
     'default': {
-        'ENGINE'    : 'django.db.backends.postgresql',
-        'NAME'      : database_config['NAME'],        # Replace with your database name
-        'USER'      : database_config['USER'],        # Replace with your database user
-        'PASSWORD'  : database_config['PASSWORD'],# Replace with your database password
-        'HOST'      : database_config['HOST'],                 # Set to the database host
-        'PORT'      : database_config['PORT'],                      # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': database_config['NAME'],        # Replace with your database name
+        'USER': database_config['USER'],        # Replace with your database user
+        'PASSWORD': database_config['PASSWORD'],# Replace with your database password
+        'HOST': database_config['HOST'],                 # Set to the database host
+        'PORT': database_config['PORT'],                      # Default PostgreSQL port
     }
 }
 
-
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -134,25 +128,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
 STATIC_URL = 'static/'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
