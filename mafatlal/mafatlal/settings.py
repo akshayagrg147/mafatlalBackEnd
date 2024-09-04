@@ -77,6 +77,8 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'x-requested-with',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_METHODS = ['DELETE','GET','OPTIONS','PATCH','POST','PUT']
 CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
