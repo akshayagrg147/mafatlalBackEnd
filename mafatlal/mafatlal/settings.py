@@ -12,31 +12,30 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from config import database_config
-from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure--_jktr33yt3mi6k#%p8_+smvkr*zw7q60#eflqcan$g(p5dz(*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True  # Enforces HTTPS
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
+DEBUG = True
 
-# ALLOWED_HOSTS = [
-#     "eapi.vridhee.com",
-#     "ec2-3-108-18-16.ap-south-1.compute.amazonaws.com",
-#     "3.108.18.16",
-#     "localhost"
-# ]
+ALLOWED_HOSTS = [
+    "ec2-3-108-18-16.ap-south-1.compute.amazonaws.com",
+    "3.108.18.16",
+    "localhost"
+]
+
 
 # Application definition
+
 INSTALLED_APPS = [
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'login',
     'home_screen',
     'order',
@@ -51,7 +51,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # This should be at the top, before CommonMiddleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,26 +63,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mafatlal.urls'
 
-# CORS settings
-CORS_ALLOWED_ALL_ORIGINS = True
-
-# CORS_ALLOW_HEADERS = list(default_headers) + [
-#     'Authorization',
-#     'Content-Type',
-#     'X-CSRF-Token',
-#     'X-Requested-With',
-# ]
-
-# CORS_ALLOW_METHODS = [
-#     'DELETE',
-#     'GET',
-#     'OPTIONS',
-#     'PATCH',
-#     'POST',
-#     'PUT',
-# ]
-
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -102,19 +83,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mafatlal.wsgi.application'
 
+
 # Database
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': database_config['NAME'],        # Replace with your database name
-        'USER': database_config['USER'],        # Replace with your database user
-        'PASSWORD': database_config['PASSWORD'],# Replace with your database password
-        'HOST': database_config['HOST'],                 # Set to the database host
-        'PORT': database_config['PORT'],                      # Default PostgreSQL port
+        'ENGINE'    : 'django.db.backends.postgresql',
+        'NAME'      : database_config['NAME'],        # Replace with your database name
+        'USER'      : database_config['USER'],        # Replace with your database user
+        'PASSWORD'  : database_config['PASSWORD'],# Replace with your database password
+        'HOST'      : database_config['HOST'],                 # Set to the database host
+        'PORT'      : database_config['PORT'],                      # Default PostgreSQL port
     }
 }
 
+
 # Password validation
+# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -130,14 +118,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 # Internationalization
+# https://docs.djangoproject.com/en/5.0/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
+
 USE_I18N = True
+
 USE_TZ = True
 
+
 # Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
+
 STATIC_URL = 'static/'
 
 # Default primary key field type
+# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
