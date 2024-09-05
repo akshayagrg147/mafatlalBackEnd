@@ -22,16 +22,17 @@ SECRET_KEY = 'django-insecure--_jktr33yt3mi6k#%p8_+smvkr*zw7q60#eflqcan$g(p5dz(*
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = False
-SECURE_SSL_REDIRECT = True
-CSRF_COOKIE_SECURE = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_SSL_REDIRECT = True  # Enforces HTTPS
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = [
-    "eapi.vridhee.com",
-    "ec2-3-108-18-16.ap-south-1.compute.amazonaws.com",
-    "3.108.18.16",
-    "localhost"
-]
+# ALLOWED_HOSTS = [
+#     "eapi.vridhee.com",
+#     "ec2-3-108-18-16.ap-south-1.compute.amazonaws.com",
+#     "3.108.18.16",
+#     "localhost"
+# ]
 
 # Application definition
 INSTALLED_APPS = [
@@ -63,25 +64,23 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'mafatlal.urls'
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "https://online.mafatlals.com"
-]
+CORS_ALLOWED_ALL_ORIGINS = True
 
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'Authorization',
-    'Content-Type',
-    'X-CSRF-Token',
-    'X-Requested-With',
-]
+# CORS_ALLOW_HEADERS = list(default_headers) + [
+#     'Authorization',
+#     'Content-Type',
+#     'X-CSRF-Token',
+#     'X-Requested-With',
+# ]
 
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
+# CORS_ALLOW_METHODS = [
+#     'DELETE',
+#     'GET',
+#     'OPTIONS',
+#     'PATCH',
+#     'POST',
+#     'PUT',
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 
