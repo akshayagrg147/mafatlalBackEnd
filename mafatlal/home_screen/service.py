@@ -7,20 +7,25 @@ from django.core import serializers as json_serializer
 import json, ast
 
 
-def home_screen_logic(user_id):
+def home_screen_logic(user_id = None, category_id = None, flag = 'external'):
     try:
         final_response = {}
-        # if not user_id:
-        #     return 'Error', None, "User_id can't be null"
-        
-        # user_obj = TblUser.objects.filter(id = user_id).first()
-        
-        # if not user_obj:
-        #     return 'Error', None, "User not found"
+        # if flag == "external":
+        #     if not user_id:
+        #         return 'Error', None, "User_id can't be null"
+            
+        #     user_obj = TblUser.objects.filter(id = user_id).first()
+            
+        #     if not user_obj:
+        #         return 'Error', None, "User not found"
         
         categories_info = []
         
-        all_categories = TblCategories.objects.all()
+        if category_id:
+            all_categories = TblCategories.objects.filter(id = category_id).all()
+        
+        else:
+            all_categories = TblCategories.objects.all()
         
         for categories in all_categories:
             category = {
@@ -57,10 +62,16 @@ def handle_sub_categories(cat_id=None):
     sub_categories = TblSubcategories.objects.filter(category = cat_id).all()
     
     for category in sub_categories:
+        is_district = TblProducts.objects.filter(district__isnull=False, product_sub_category = category.id)
+        is_state = TblProducts.objects.filter(state__isnull=False, product_sub_category = category.id)
+        is_organization = TblProducts.objects.filter(organization__isnull=False, product_sub_category = category.id)
         respo = {
-            "id"    : category.id,
-            "name"  : category.subcategories_name,
-            "img"   : category.image
+            "id"                : category.id,
+            "name"              : category.subcategories_name,
+            "img"               : category.image,
+            "is_district"       : True if is_district else False,
+            "is_state"          : True if is_state else False,
+            "is_organization"   : True if is_organization else False
         }
         
         final_response.append(respo)
@@ -108,6 +119,26 @@ def product_info_logic(product_id):
         
         product_obj = TblProducts.objects.filter(id = int(product_id)).first()
         
+        related_products_objs = TblProducts.objects.filter(product_sub_category_id = product_obj.product_sub_category_id).all()
+        related_products = []
+        for objs in related_products_objs:
+            product_category = TblCategories.objects.filter(id = int(objs.product_category_id)).first()
+            product_sub_category = TblSubcategories.objects.filter(id = int(objs.product_sub_category_id)).first()
+            images_list = ast.literal_eval(objs.__dict__['product_image'])
+            products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
+            related_products.append({
+                'id'                        : objs.id,
+                'name'                      : objs.product_name,
+                'product_category_id'       : objs.product_category_id,
+                'product_category'          : product_category.categories_name,
+                'product_sub_category_id'   : objs.product_sub_category_id,
+                'product_sub_category'      : product_category.categories_name,
+                'size_available'            : product_sub_category.subcategories_name,
+                'product_image'             : products_images,
+                'price'                     : objs.price,
+                'description'               : objs.description
+            })
+        
         if product_obj:
             product_category = TblCategories.objects.filter(id = int(product_obj.product_category_id)).first()
             product_sub_category = TblSubcategories.objects.filter(id = int(product_obj.product_sub_category_id)).first()
@@ -119,6 +150,7 @@ def product_info_logic(product_id):
             final_response['product_image']             = product_obj.product_image
             final_response['price']                     = product_obj.price
             final_response['description']               = product_obj.description
+            final_response['related_products']          = related_products
             
         return 'Success', final_response, 'Product data fetched successfully'
             
@@ -133,6 +165,10 @@ def product_info_logic(product_id):
 def sub_catproduct_info_logic(data):
     try:
         final_response = []
+        category_id = data['category'] if 'category' in data else None
+        if category_id:
+            return home_screen_logic(category_id=category_id, flag='internal')
+        
         sub_catid = data['sub_id'] if 'sub_id' in data else None
         
         district_id = data['district'] if 'district' in data else None
@@ -158,13 +194,15 @@ def sub_catproduct_info_logic(data):
                     category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
                     size_dict = obj.__dict__['size_available']
                     size_dict = json.dumps(size_dict)
+                    images_list = ast.literal_eval(obj.__dict__['product_image'])
+                    products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
                     response = {
                         "product_id"            : obj.__dict__['id'],
                         "product_name"          : obj.__dict__['product_name'],
                         "product_category"      : category.categories_name if category else 'Global',
                         "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
                         "size_available"        : json.loads(size_dict),
-                        "product_image"         : obj.__dict__['product_image'],
+                        "product_image"         : products_images,
                         "price"                 : obj.__dict__['price'],
                     }
                     
@@ -200,17 +238,16 @@ def sub_catproduct_info_logic(data):
                     category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
                     size_dict = obj.__dict__['size_available']
                     size_dict = json.dumps(size_dict)
+                    images_list = ast.literal_eval(obj.__dict__['product_image'])
+                    products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
                     response = {
                         "product_id"            : obj.__dict__['id'],
                         "product_name"          : obj.__dict__['product_name'],
                         "product_category"      : category.categories_name if category else 'Global',
                         "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
                         "size_available"        : json.loads(size_dict),
-                        "product_image"         : obj.__dict__['product_image'],
-                        "price"                 : obj.__dict__['price'],
-                        "is_district"           : True if obj.__dict__['district_id'] else False,
-                        "is_state"              : True if obj.__dict__['state_id'] else False,
-                        "is_org"                : True if obj.__dict__['organization_id'] else False
+                        "product_image"         : products_images,
+                        "price"                 : obj.__dict__['price']
                     }
                     
                     final_response.append(response)
