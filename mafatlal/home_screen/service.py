@@ -141,13 +141,13 @@ def sub_catproduct_info_logic(data):
         
         if district_id or state_id or org_id:
             if district_id:
-                products_obj = TblProducts.objects.filter(district = district_id).all()
+                products_obj = TblProducts.objects.filter(district = district_id, product_sub_category = sub_catid).all()
             
             elif state_id:
-                products_obj = TblProducts.objects.filter(state = state_id).all()
+                products_obj = TblProducts.objects.filter(state = state_id, product_sub_category = sub_catid).all()
             
             elif org_id:
-                products_obj = TblProducts.objects.filter(organization = org_id).all()
+                products_obj = TblProducts.objects.filter(organization = org_id, product_sub_category = sub_catid).all()
             
             if products_obj:
                 for obj in products_obj:
