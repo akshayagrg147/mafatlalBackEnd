@@ -8,6 +8,7 @@ from django.core import serializers as json_serializer
 from datetime import datetime, timezone
 import string
 import json
+import requests
 
 def register_user(data):
     try:
@@ -222,3 +223,24 @@ def user_info_logic(user_id):
         print(f"!!! ERROR !!! Error with the register user :- {str(e)} ##################")
 
         return False, None, str(e)
+
+
+def gst_number_verification(gst_number):
+    try:
+        if not gst_number:
+            raise Exception("GST number can't be empty")
+        
+        url = f"http://sheet.gstincheck.co.in/check/3845305c717a590e31e93d29bece8a0b/{gst_number}"
+        # url = f"http://www.google.com"
+        
+        status = requests.get(url)
+        data = status.content.decode('utf-8')
+        data = json.loads(data)
+        
+        return True, data, 'success'
+    
+    except Exception as e:
+        print(constants.BREAKCODE)
+        print(f"!!! ERROR !!! Error with the gst_number_verification :- {str(e)} ##################")
+        return False, None, str(e)
+    

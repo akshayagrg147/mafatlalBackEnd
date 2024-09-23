@@ -1,4 +1,4 @@
-from home_screen.models import TblCategories, TblSubcategories, TblProducts, TblAddress
+from home_screen.models import TblCategories, TblSubcategories, TblProducts, TblAddress, TblDistrict, TblOrganization, TblState
 from mafatlal import constants
 from login.models import TblUser
 from django.db.models import F
@@ -70,8 +70,8 @@ def handle_sub_categories(cat_id=None):
 def handle_product_info():
     final_response = []
     products_obj = TblProducts.objects.select_related('product_category').filter(
-    product_category__categories_name='Global'
-    )
+    product_category__categories_name='Uniforms'
+    )[:6]
     
     if products_obj:
         for obj in products_obj:
@@ -80,13 +80,16 @@ def handle_product_info():
             category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
             size_dict = obj.__dict__['size_available']
             size_dict = json.dumps(size_dict)
+            images_list = ast.literal_eval(obj.__dict__['product_image'])
+            products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
             response = {
-                "product_id"        : obj.__dict__['id'],
-                "product_name"      : obj.__dict__['product_name'],
-                "product_category"  : category.categories_name if category else 'Global',
-                "size_available"    : json.loads(size_dict),
-                "product_image"     : obj.__dict__['product_image'],
-                "price"             : obj.__dict__['price']
+                "product_id"            : obj.__dict__['id'],
+                "Selected_category_id"  : category.id,
+                "product_name"          : obj.__dict__['product_name'],
+                "product_category"      : category.categories_name if category else 'Global',
+                "size_available"        : json.loads(size_dict),
+                "product_image"         : products_images,
+                "price"                 : obj.__dict__['price']
             }
             
             final_response.append(response)
@@ -127,32 +130,90 @@ def product_info_logic(product_id):
         print(f"Error while extracting th procuct info as {str(e)}")
         return 'Error', None, str(e)
     
-def sub_catproduct_info_logic(sub_catid):
+def sub_catproduct_info_logic(data):
     try:
         final_response = []
+        sub_catid = data['sub_id'] if 'sub_id' in data else None
         
-        products_obj = TblProducts.objects.filter(product_sub_category = sub_catid).all()
+        district_id = data['district'] if 'district' in data else None
+        state_id = data['state'] if 'state' in data else None
+        org_id = data['organization'] if 'organization' in data else None
         
-        if products_obj:
-            for obj in products_obj:
-                response = {}
-                
-                product_sub_category = TblSubcategories.objects.filter(id = int(obj.product_sub_category_id)).first()
-                
-                category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
-                size_dict = obj.__dict__['size_available']
-                size_dict = json.dumps(size_dict)
-                response = {
-                    "product_id"            : obj.__dict__['id'],
-                    "product_name"          : obj.__dict__['product_name'],
-                    "product_category"      : category.categories_name if category else 'Global',
-                    "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
-                    "size_available"        : json.loads(size_dict),
-                    "product_image"         : obj.__dict__['product_image'],
-                    "price"                 : obj.__dict__['price']
-                }
-                
-                final_response.append(response)
+        if district_id or state_id or org_id:
+            if district_id:
+                products_obj = TblProducts.objects.filter(district = district_id).all()
+            
+            elif state_id:
+                products_obj = TblProducts.objects.filter(state = state_id).all()
+            
+            elif org_id:
+                products_obj = TblProducts.objects.filter(organization = org_id).all()
+            
+            if products_obj:
+                for obj in products_obj:
+                    response = {}
+                    
+                    product_sub_category = TblSubcategories.objects.filter(id = int(obj.product_sub_category_id)).first()
+                    
+                    category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
+                    size_dict = obj.__dict__['size_available']
+                    size_dict = json.dumps(size_dict)
+                    response = {
+                        "product_id"            : obj.__dict__['id'],
+                        "product_name"          : obj.__dict__['product_name'],
+                        "product_category"      : category.categories_name if category else 'Global',
+                        "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
+                        "size_available"        : json.loads(size_dict),
+                        "product_image"         : obj.__dict__['product_image'],
+                        "price"                 : obj.__dict__['price'],
+                    }
+                    
+                    if obj.__dict__['district_id']:
+                        response['district_id'] = obj.__dict__['district_id']
+                        response['district_name'] = obj.district.district_name
+                        response['state_id'] = obj.district.state_id
+                        response['state_name'] = obj.district.state.state_name
+                    
+                    if obj.__dict__['state_id']:
+                        response['state_id'] = obj.__dict__['state_id']
+                        response['state_name'] = obj.state.state_name
+                        
+                    if obj.__dict__['organization_id']:
+                        response['organization_id'] = obj.__dict__['organization_id']
+                        response['organization_name'] = obj.organization.org_name
+                        response['district_id'] = obj.organization.district_id
+                        response['district_name'] = obj.organization.district.district_name
+                        response['state_id'] = obj.organization.state_id
+                        response['state_name'] = obj.organization.state.state_name
+                    
+                    final_response.append(response)
+            
+        else:
+            products_obj = TblProducts.objects.filter(product_sub_category = sub_catid).all()
+            
+            if products_obj:
+                for obj in products_obj:
+                    response = {}
+                    
+                    product_sub_category = TblSubcategories.objects.filter(id = int(obj.product_sub_category_id)).first()
+                    
+                    category = TblCategories.objects.filter(id = obj.__dict__['product_category_id']).first()
+                    size_dict = obj.__dict__['size_available']
+                    size_dict = json.dumps(size_dict)
+                    response = {
+                        "product_id"            : obj.__dict__['id'],
+                        "product_name"          : obj.__dict__['product_name'],
+                        "product_category"      : category.categories_name if category else 'Global',
+                        "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
+                        "size_available"        : json.loads(size_dict),
+                        "product_image"         : obj.__dict__['product_image'],
+                        "price"                 : obj.__dict__['price'],
+                        "is_district"           : True if obj.__dict__['district_id'] else False,
+                        "is_state"              : True if obj.__dict__['state_id'] else False,
+                        "is_org"                : True if obj.__dict__['organization_id'] else False
+                    }
+                    
+                    final_response.append(response)
             
         return 'Success', final_response, 'Product data fetched successfully'
             
@@ -344,6 +405,76 @@ def search_category_logic(data):
         print(f"!!! ERROR !!! Error with the search_category_logicc :- {str(e)} ##################")
 
         return 'Error', None, str(e)
+    
+    
+def get_states(data):
+    try:
+        final_response = []
+        
+        states_objs = TblState.objects.all()
+        
+        if states_objs:
+            for obj in states_objs:
+                final_response.append({'id' : obj.id, 'name' : obj.state_name})
+                
+        return 'Success', final_response, "All states found successfully"
+
+    except Exception as e:
+        print(constants.BREAKCODE)
+        print(f"!!! ERROR !!! Error with the get_states :- {str(e)} ##################")
+
+        return 'Error', None, str(e)
+
+
+def get_district(data):
+    try:
+        final_response = []
+        
+        search_string = data['state'] if 'state' in data else None
+        
+        district_objs = TblDistrict.objects.filter(state_id =search_string).all()
+        
+        if district_objs:
+            for obj in district_objs:
+                final_response.append({'id' : obj.id, 'name' : obj.district_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name})
+                
+        return 'Success', final_response, "All categories found successfully"
+
+    except Exception as e:
+        print(constants.BREAKCODE)
+        print(f"!!! ERROR !!! Error with the get_district :- {str(e)} ##################")
+
+        return 'Error', None, str(e)
+
+
+def get_organizations(data):
+    try:
+        final_response = []
+        
+        state_id = data['state'] if 'state' in data else None
+        district_id = data['district'] if 'district' in data else None
+        
+        if state_id and district_id:
+            products_objs = TblOrganization.objects.filter(state_id = state_id, district_id = district_id).all()
+        
+        elif state_id:
+            products_objs = TblOrganization.objects.filter(state_id = state_id).all()
+        
+        elif district_id:
+            products_objs = TblOrganization.objects.filter(district_id = district_id).all()
+        if products_objs:
+            for obj in products_objs:
+                final_response.append({'id' : obj.id, 'name' : obj.org_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name, 'district_id' : obj.district_id, "district_name" : obj.district.district_name})
+                
+        return 'Success', final_response, "All organizations found successfully"
+
+    except Exception as e:
+        print(constants.BREAKCODE)
+        print(f"!!! ERROR !!! Error with the get_organizations :- {str(e)} ##################")
+
+        return 'Error', None, str(e)
+
+
     
     
     

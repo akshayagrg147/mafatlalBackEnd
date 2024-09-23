@@ -3,6 +3,9 @@ from home_screen import views
 
 urlpatterns = [
     path('home', views.home_screen_info),
+    path('get_state', views.get_state_logic),
+    path('get_district', views.get_district_logic),
+    path('get_organizations', views.get_organizations_logic),
     path('product_info', views.product_info),
     path('product_list', views.home_sub_category_product_info),
     path('product_info_list', views.product_info_list),

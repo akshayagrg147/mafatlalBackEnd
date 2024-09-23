@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
-from .service import login_check, register_user, user_info_logic
+from .service import login_check, register_user, user_info_logic, gst_number_verification
 from mafatlal import constants
 
 @api_view(['POST'])
@@ -32,5 +32,18 @@ def user_info(request):
     data = request.query_params
     user_id = data['user_id'] if 'user_id' in data else None
     status, response_data, message = user_info_logic(user_id)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+
+@api_view(['GET'])
+def gst_verification(request):
+    print(constants.BREAKCODE)
+    print(constants.INITIATED_GET_VERIFICATION)
+
+    data = request.query_params
+    gst_number = data.get('gst_number')
+    
+    status, response_data, message = gst_number_verification(gst_number)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()

@@ -24,6 +24,30 @@ class TblSubcategories(models.Model):
         managed = False
         db_table = 'tbl_subcategories'
         
+class TblState(models.Model):
+    state_name = models.CharField(max_length=75)
+
+    class Meta:
+        managed = False
+        db_table = 'tbl_state'
+        
+class TblDistrict(models.Model):
+    district_name = models.CharField(max_length=75)
+    state = models.ForeignKey(TblState, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tbl_district'
+        
+class TblOrganization(models.Model):
+    org_name = models.CharField(max_length=75)
+    state = models.ForeignKey(TblState, models.DO_NOTHING, blank=True, null=True)
+    district = models.ForeignKey(TblDistrict, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tbl_organization'
+        
 class TblProducts(models.Model):
     product_name = models.CharField(max_length=75)
     product_category = models.ForeignKey(TblCategories, models.DO_NOTHING, db_column='product_category', blank=True, null=True)
@@ -36,6 +60,9 @@ class TblProducts(models.Model):
     created_by = models.CharField(max_length=50, blank=True, null=True)
     updated_on = models.DateTimeField()
     updated_by = models.CharField(max_length=50, blank=True, null=True)
+    state = models.ForeignKey(TblState, models.DO_NOTHING, db_column='state', blank=True, null=True)
+    district = models.ForeignKey(TblDistrict, models.DO_NOTHING, db_column='district', blank=True, null=True)
+    organization = models.ForeignKey(TblOrganization, models.DO_NOTHING, db_column='organization', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -56,3 +83,5 @@ class TblAddress(models.Model):
     class Meta:
         managed = False
         db_table = 'tbl_address'
+
+        

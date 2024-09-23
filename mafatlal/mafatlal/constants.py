@@ -29,4 +29,6 @@ INITIATED_PRODUCTS_ADD          = "Initaited the products add api"
 INITIATED_PRODUCTS_UPDATE       = "Initaited the products update api"
 INITIATED_PRODUCTS_DELETE       = "Initaited the products delete api"
 
+INITIATED_GET_VERIFICATION      = "Initaited the gst verification api"
+
 ERROR_MESSAGE           = "Invalid_Request"
