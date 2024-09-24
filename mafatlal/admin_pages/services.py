@@ -3,6 +3,7 @@ from mafatlal.api_serializer import add_products_serializer
 import datetime
 from login.models import TblUser
 import json
+import ast
 
 
 def get_orgs(user_id):
@@ -349,7 +350,10 @@ def get_products(data):
             
         else:
             products_obj = TblProducts.objects.all()
-        
+        images_list = ast.literal_eval(product_object.product_image)
+        products_images = {}
+        for i in range(len(images_list)):
+            products_images[f"image_{i+1}"] = images_list[i]
         for product_object in products_obj:
             response = {
                             "id"                    : product_object.id,
@@ -360,7 +364,7 @@ def get_products(data):
                             "sub_category_name"     : product_object.product_sub_category.subcategories_name,
                             "price"                 : product_object.price,
                             "description"           : product_object.description,
-                            "product_image"         : product_object.product_image,
+                            "product_image"         : products_images,
                             "size_available"        : product_object.size_available
                         }
             

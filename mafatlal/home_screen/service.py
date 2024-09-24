@@ -92,7 +92,9 @@ def handle_product_info():
             size_dict = obj.__dict__['size_available']
             size_dict = json.dumps(size_dict)
             images_list = ast.literal_eval(obj.__dict__['product_image'])
-            products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
+            products_images = {}
+            for i in range(len(images_list)):
+                products_images[f"image_{i+1}"] = images_list[i]
             response = {
                 "product_id"            : obj.__dict__['id'],
                 "Selected_category_id"  : category.id,
@@ -125,7 +127,9 @@ def product_info_logic(product_id):
             product_category = TblCategories.objects.filter(id = int(objs.product_category_id)).first()
             product_sub_category = TblSubcategories.objects.filter(id = int(objs.product_sub_category_id)).first()
             images_list = ast.literal_eval(objs.__dict__['product_image'])
-            products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
+            products_images = {}
+            for i in range(len(images_list)):
+                products_images[f"image_{i+1}"] = images_list[i]
             related_products.append({
                 'id'                        : objs.id,
                 'name'                      : objs.product_name,
@@ -140,6 +144,10 @@ def product_info_logic(product_id):
             })
         
         if product_obj:
+            images_list = ast.literal_eval(product_obj.product_image)
+            products_images = {}
+            for i in range(len(images_list)):
+                products_images[f"image_{i+1}"] = images_list[i]
             product_category = TblCategories.objects.filter(id = int(product_obj.product_category_id)).first()
             product_sub_category = TblSubcategories.objects.filter(id = int(product_obj.product_sub_category_id)).first()
             final_response['id']                        = product_id
@@ -147,7 +155,7 @@ def product_info_logic(product_id):
             final_response['product_category']          = product_category.categories_name
             final_response['product_sub_category']      = product_sub_category.subcategories_name
             final_response['size_available']            = product_obj.size_available
-            final_response['product_image']             = product_obj.product_image
+            final_response['product_image']             = products_images
             final_response['price']                     = product_obj.price
             final_response['description']               = product_obj.description
             final_response['related_products']          = related_products
@@ -195,7 +203,9 @@ def sub_catproduct_info_logic(data):
                     size_dict = obj.__dict__['size_available']
                     size_dict = json.dumps(size_dict)
                     images_list = ast.literal_eval(obj.__dict__['product_image'])
-                    products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
+                    products_images = {}
+                    for i in range(len(images_list)):
+                        products_images[f"image_{i+1}"] = images_list[i]
                     response = {
                         "product_id"            : obj.__dict__['id'],
                         "product_name"          : obj.__dict__['product_name'],
@@ -239,7 +249,9 @@ def sub_catproduct_info_logic(data):
                     size_dict = obj.__dict__['size_available']
                     size_dict = json.dumps(size_dict)
                     images_list = ast.literal_eval(obj.__dict__['product_image'])
-                    products_images = [{f"image_{i+1}":images_list[i] for i in range(len(images_list))}]
+                    products_images = {}
+                    for i in range(len(images_list)):
+                        products_images[f"image_{i+1}"] = images_list[i]
                     response = {
                         "product_id"            : obj.__dict__['id'],
                         "product_name"          : obj.__dict__['product_name'],
