@@ -225,7 +225,7 @@ def user_info_logic(user_id):
         return False, None, str(e)
 
 
-def gst_number_verification(gst_number):
+def gst_number_verification(gst_number, pncd):
     try:
         if not gst_number:
             raise Exception("GST number can't be empty")
@@ -236,8 +236,14 @@ def gst_number_verification(gst_number):
         status = requests.get(url)
         data = status.content.decode('utf-8')
         data = json.loads(data)
+
+        pincode = data['data']['pradr']['addr']['pncd']
         
-        return True, data, 'success'
+        if pincode == pncd:
+            return True, {"message":"GST verified"}, 'success'
+
+        else:
+            return False, {}, 'GST not verified'
     
     except Exception as e:
         print(constants.BREAKCODE)

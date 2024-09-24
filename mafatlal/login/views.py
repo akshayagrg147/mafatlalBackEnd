@@ -43,7 +43,8 @@ def gst_verification(request):
 
     data = request.query_params
     gst_number = data.get('gst_number')
+    pincode = data.get('pincode')
     
-    status, response_data, message = gst_number_verification(gst_number)
+    status, response_data, message = gst_number_verification(gst_number, pincode)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
