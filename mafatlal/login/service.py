@@ -20,6 +20,11 @@ def register_user(data):
         if user_obj:
             return True, None, 'User already registered'
         
+        status, response_data, message = gst_number_verification(data['gst'], data['pincode'])
+        
+        if not status:
+            return True, None, 'GST number verification failed'
+        
         salt_key = generate_salt_key()
         
         encoded_password = hmac.new(salt_key.encode(), data['password'].encode(), hashlib.sha512).hexdigest()
