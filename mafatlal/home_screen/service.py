@@ -524,7 +524,7 @@ def get_organizations(data):
             
         if products_objs:
             for obj in products_objs:
-                final_response.append({'id' : obj.id, 'name' : obj.org_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name, 'district_id' : obj.district_id, "district_name" : obj.district.district_name})
+                final_response.append({'id' : obj.id, 'name' : obj.org_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name, 'district_id' : obj.district_id, "district_name" : obj.district.district_name, "sub_category_id" : obj.sub_id, "sub_category_name" : obj.sub.subcategories_name})
                 
         return 'Success', final_response, "All organizations found successfully"
 
