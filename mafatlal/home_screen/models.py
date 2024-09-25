@@ -43,6 +43,7 @@ class TblOrganization(models.Model):
     org_name = models.CharField(max_length=75)
     state = models.ForeignKey(TblState, models.DO_NOTHING, blank=True, null=True)
     district = models.ForeignKey(TblDistrict, models.DO_NOTHING, blank=True, null=True)
+    sub = models.ForeignKey(TblSubcategories, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False

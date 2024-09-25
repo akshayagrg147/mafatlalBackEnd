@@ -507,6 +507,7 @@ def get_organizations(data):
         
         state_id = data['state'] if 'state' in data else None
         district_id = data['district'] if 'district' in data else None
+        subcat = data['sub_id'] if 'sub_id' in data else None
         
         if state_id and district_id:
             products_objs = TblOrganization.objects.filter(state_id = state_id, district_id = district_id).all()
@@ -516,6 +517,11 @@ def get_organizations(data):
         
         elif district_id:
             products_objs = TblOrganization.objects.filter(district_id = district_id).all()
+            
+        elif subcat:
+            products_objs = TblOrganization.objects.filter(sub_id = subcat).all()
+            
+            
         if products_objs:
             for obj in products_objs:
                 final_response.append({'id' : obj.id, 'name' : obj.org_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name, 'district_id' : obj.district_id, "district_name" : obj.district.district_name})
