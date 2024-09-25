@@ -83,11 +83,11 @@ def handle_sub_categories(cat_id=None):
 def handle_product_info(cat_id = None):
     final_response = []
     if cat_id:
-        products_obj = TblProducts.objects.filter(product_category = cat_id).all()
+        products_obj = TblProducts.objects.filter(product_category = cat_id).all()[:6]
     else:
         products_obj = TblProducts.objects.select_related('product_category').filter(
         product_category__categories_name='Uniforms'
-        )
+        )[:6]
     
     if products_obj:
         for obj in products_obj:
