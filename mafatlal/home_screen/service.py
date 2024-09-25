@@ -82,7 +82,7 @@ def handle_product_info():
     final_response = []
     products_obj = TblProducts.objects.select_related('product_category').filter(
     product_category__categories_name='Uniforms'
-    )[:6]
+    )
     
     if products_obj:
         for obj in products_obj:
