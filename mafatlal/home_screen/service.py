@@ -39,8 +39,10 @@ def home_screen_logic(user_id = None, category_id = None, flag = 'external'):
             
             
         final_response['categories'] = categories_info
-        
-        products_info = handle_product_info()
+        if len(all_categories) == 1:
+            products_info = handle_product_info(all_categories[0].id)
+        else:
+            products_info = handle_product_info()
         
         final_response['products'] = products_info
         
@@ -78,11 +80,14 @@ def handle_sub_categories(cat_id=None):
     
     return final_response
 
-def handle_product_info():
+def handle_product_info(cat_id = None):
     final_response = []
-    products_obj = TblProducts.objects.select_related('product_category').filter(
-    product_category__categories_name='Uniforms'
-    )
+    if cat_id:
+        products_obj = TblProducts.objects.filter(product_category = cat_id).all()
+    else:
+        products_obj = TblProducts.objects.select_related('product_category').filter(
+        product_category__categories_name='Uniforms'
+        )
     
     if products_obj:
         for obj in products_obj:
