@@ -537,9 +537,10 @@ def get_organizations(data):
 
         return 'Error', None, str(e)
 
-def upload_images(request):
+def upload_images_logic(request):
     try:
         # Initialize S3 client with your AWS credentials
+        print(f"Under upload_images function with S3_config")
         print(f"S3_config :- {S3_config}")
         s3_client = boto3.client(
             's3', 
