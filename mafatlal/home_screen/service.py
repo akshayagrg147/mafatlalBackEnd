@@ -1,10 +1,11 @@
 from home_screen.models import TblCategories, TblSubcategories, TblProducts, TblAddress, TblDistrict, TblOrganization, TblState
 from mafatlal import constants
 from login.models import TblUser
-from django.db.models import F
 from mafatlal import api_serializer
-from django.core import serializers as json_serializer
 import json, ast
+import boto3
+from botocore.exceptions import NoCredentialsError
+from config import S3_config
 
 
 def home_screen_logic(user_id = None, category_id = None, flag = 'external'):
@@ -534,7 +535,49 @@ def get_organizations(data):
 
         return 'Error', None, str(e)
 
+def upload_images(request):
+    try:
+        # Initialize S3 client with your AWS credentials
+        s3_client = boto3.client(
+            's3', 
+            aws_access_key_id       = S3_config['AWS_ACCESS_KEY_ID'], 
+            aws_secret_access_key   = S3_config['AWS_SECRET_ACCESS_KEY'],
+            region_name             = S3_config['REGION_NAME'],
+        )
+        
+        bucket_name = "mafatlal-ecommerce-bucket"
 
+        # Extract the image and mime_type from the form data
+        mime_type = request.data.get('mime_type')
+        image = request.FILES.get('photo_dec')
+        image_name = request.data.get('image_name')
+        
+        if not mime_type or not image:
+            return 'Error', None, "Missing 'mime_type' or 'photo_dec' field"
+
+        # Create the file name
+        pic_name = f"{image_name}.{mime_type}"
+
+        # Upload to S3
+        s3_client.upload_fileobj(
+            image, 
+            bucket_name, 
+            pic_name, 
+            ExtraArgs={"ContentType": f"image/{mime_type}"}
+        )
+        
+        # Generate the file URL
+        file_url = f"https://{bucket_name}.s3.amazonaws.com/{pic_name}"
+        
+        return 'Success', {"file_url": file_url}, "File uploaded successfully"
+    
+    except NoCredentialsError:
+        return 'Error', None, "Credentials not available"
+
+    except Exception as e:
+        return 'Error', None, str(e)
     
     
+    
+            
     

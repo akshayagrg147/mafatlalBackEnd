@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
-from .service import home_screen_logic, product_info_logic,sub_catproduct_info_logic, product_info_list_logic, address_insertion_logic, address_updation_logic, search_category_logic, get_states, get_district, get_organizations
+from .service import home_screen_logic, product_info_logic,sub_catproduct_info_logic, product_info_list_logic, address_insertion_logic, address_updation_logic, search_category_logic, get_states, get_district, get_organizations, upload_images
 import json
 
 @api_view(['GET'])
@@ -128,4 +128,14 @@ def get_organizations_logic(request):
     status, response_data, message = get_organizations(data)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['POST'])
+def upload_image(request):
+    print(constants.BREAKCODE)
+    
+    status, response_data, message = upload_images(request)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+
 

@@ -7,3 +7,9 @@ database_config = {
     'HOST'      : config('DB_HOST'),                
     'PORT'      : config('DB_PORT'),
 }
+
+S3_config = {
+    "AWS_ACCESS_KEY_ID"     : config('AWS_ACCESS_KEY_ID'),
+    "AWS_SECRET_ACCESS_KEY" : config('AWS_SECRET_ACCESS_KEY'),
+    "REGION_NAME"           : config('REGION_NAME'),
+}
