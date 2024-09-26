@@ -1,7 +1,9 @@
 from home_screen.models import TblCategories, TblSubcategories, TblProducts, TblAddress, TblDistrict, TblOrganization, TblState
 from mafatlal import constants
 from login.models import TblUser
+from django.db.models import F
 from mafatlal import api_serializer
+from django.core import serializers as json_serializer
 import json, ast
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -538,11 +540,12 @@ def get_organizations(data):
 def upload_images(request):
     try:
         # Initialize S3 client with your AWS credentials
+        print(f"S3_config :- {S3_config}")
         s3_client = boto3.client(
             's3', 
             aws_access_key_id       = S3_config['AWS_ACCESS_KEY_ID'], 
             aws_secret_access_key   = S3_config['AWS_SECRET_ACCESS_KEY'],
-            region_name             = S3_config['REGION_NAME'],
+            region_name             = S3_config['REGION_NAME']
         )
         
         bucket_name = "mafatlal-ecommerce-bucket"
