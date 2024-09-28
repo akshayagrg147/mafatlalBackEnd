@@ -1,4 +1,4 @@
-from .models import TblCategories, TblSubcategories, TblProducts
+from .models import TblCategories, TblSubcategories, TblProducts, TblOrganization
 from mafatlal.api_serializer import add_products_serializer
 import datetime
 from login.models import TblUser
@@ -6,7 +6,8 @@ import json
 import ast
 
 
-def get_orgs(user_id):
+# Categories Related Functions
+def get_category(user_id):
     try:
         final_response = []
         if not user_id:
@@ -16,9 +17,9 @@ def get_orgs(user_id):
         if not user_obj:
             raise Exception("User is not present")
         
-        organization = TblCategories.objects.all()
+        categories = TblCategories.objects.all()
         
-        for cat_object in organization:
+        for cat_object in categories:
             response = {
                         "id"    : cat_object.id,
                         "name"  : cat_object.categories_name,
@@ -28,14 +29,14 @@ def get_orgs(user_id):
             final_response.append(response)
             
         
-        return True, final_response, "Organizations fetched successully"
+        return True, final_response, "Categories fetched successully"
         
         
     except Exception as e:
-        print(f"Error in fetching organizations from database as {str(e)}")
+        print(f"Error in fetching categories from database as {str(e)}")
         return False, {}, str(e)
 
-def add_orgs(user_id, data):
+def add_category(user_id, data):
     try:
         final_response = []
         message = []
@@ -83,17 +84,17 @@ def add_orgs(user_id, data):
                 err_message = f"Error while adding category :- {category_name} as {str(e)}"
                 message.append(err_message)
                 
-            if message:
-                return True, final_response, message
-            
-            else:
-                return True, final_response, "Organization Added successfully"
+        if message:
+            return True, final_response, message
+        
+        else:
+            return True, final_response, "Organization Added successfully"
                 
     except Exception as e:
         print(f"Error in adding organization in database as {str(e)}")
         return False, {}, str(e)
     
-def update_orgs(data):
+def update_category(data):
     try:
         category_id = data.get("id")
         
@@ -128,7 +129,7 @@ def update_orgs(data):
         print(f"Error in updating organization in database as {str(e)}")
         return False, {}, str(e)
     
-def delete_orgs(data):
+def delete_category(data):
     try:
         category_id = data.get("id")
         
@@ -159,7 +160,7 @@ def delete_orgs(data):
         return False, {}, str(e)
 
 
-
+# Sub_categories Related Functions
 def get_sub_category(data):
     try:
         final_response = []
@@ -171,9 +172,9 @@ def get_sub_category(data):
         if not user_obj:
             raise Exception("User is not present")
         
-        organization = data.get('organization')
-        if organization:
-            sub_category_obj = TblSubcategories.objects.filter(category = organization).all()
+        category = data.get('category')
+        if category:
+            sub_category_obj = TblSubcategories.objects.filter(category = category).all()
         
         else:
             sub_category_obj = TblSubcategories.objects.all()
@@ -221,32 +222,36 @@ def add_sub_category(user_id, data):
                             "id"                : subcat_object.id,
                             "name"              : subcat_object.subcategories_name,
                             "image"             : subcat_object.image,
-                            "organization_id"   : subcat_object.category,
-                            "organization_name" : subcat_object.category.categories_name
+                            "category_id"       : subcat_object.category,
+                            "category_name"     : subcat_object.category.categories_name
                         }
                         
                         final_response.append(response)
                     
                     else:
                         organization_object = TblCategories.objects.filter(id = parent_category).first()
-                        sub_category_object = TblSubcategories(subcategories_name = sub_category_name,
-                                                            category = organization_object,
-                                                            image = sub_category_image,
-                                                            created_by = user_id)
+                        if organization_object:
+                            sub_category_object = TblSubcategories(subcategories_name = sub_category_name,
+                                                                category = organization_object,
+                                                                image = sub_category_image,
+                                                                created_by = user_id)
                     
-                        sub_category_object.save()
+                            sub_category_object.save()
                         
-                        subcat_object = TblSubcategories.objects.filter(subcategories_name = sub_category_name, created_by = user_id, category = parent_category).first()
+                            subcat_object = TblSubcategories.objects.filter(subcategories_name = sub_category_name, created_by = user_id, category = parent_category).first()
+                            
+                            response = {
+                                "id"                : subcat_object.id,
+                                "name"              : subcat_object.subcategories_name,
+                                "image"             : subcat_object.image,
+                                "category_id"       : subcat_object.category_id,
+                                "category_name"     : subcat_object.category.categories_name
+                            }
+                            
+                            final_response.append(response)
                         
-                        response = {
-                            "id"                : subcat_object.id,
-                            "name"              : subcat_object.subcategories_name,
-                            "image"             : subcat_object.image,
-                            "organization_id"   : subcat_object.category_id,
-                            "organization_name" : subcat_object.category.categories_name
-                        }
-                        
-                        final_response.append(response)
+                        else:
+                            raise Exception(f"{parent_category} category not found")
             
             except Exception as e:
                 err_message = f"Error while adding sub_category :- {sub_category_image} as {str(e)}"
@@ -289,14 +294,14 @@ def update_sub_category(data):
                     "id"                : subcategory_object.id,
                     "name"              : subcategory_object.subcategories_name,
                     "image"             : subcategory_object.image,
-                    "organization_id"   : subcategory_object.category_id,
-                    "organization_name" : subcategory_object.category.categories_name
+                    "category_id"       : subcategory_object.category_id,
+                    "category_name"     : subcategory_object.category.categories_name
                 }
         
-        return True, response, "Category updated successfully"
+        return True, response, "sub_category updated successfully"
         
     except Exception as e:
-        print(f"Error in updating organization in database as {str(e)}")
+        print(f"Error in updating sub_category in database as {str(e)}")
         return False, {}, str(e)
 
 def delete_sub_category(data):
@@ -306,7 +311,7 @@ def delete_sub_category(data):
         if not subcat_id:
             raise Exception("sub_category id is none")
         
-        global_sub_obj = TblSubcategories.objects.filter(id = 8).first()
+        global_sub_obj = TblSubcategories.objects.filter(subcategories_name = 'Global').first()
         
         sub_categories = TblSubcategories.objects.filter(id=subcat_id).first()
 
@@ -323,6 +328,199 @@ def delete_sub_category(data):
     except Exception as e:
         print(f"Error in deleting sub_category from database as {str(e)}")
         return False, {}, str(e)
+
+
+# Organization Related Functions
+def get_orgs(data):
+    try:
+        final_response = []
+        user_id = data.get('user_id')
+        if not user_id:
+            raise Exception("User is null")
+        
+        user_obj = TblUser.objects.filter(id = user_id).first()
+        if not user_obj:
+            raise Exception("User is not present")
+        
+        sub_category = data.get('sub_category')
+        if sub_category:
+            organization_obj = TblOrganization.objects.filter(sub = sub_category).all()
+        
+        else:
+            organization_obj = TblOrganization.objects.all()
+        
+        for orgs in organization_obj:
+            response = {
+                        "id"                : orgs.id,
+                        "name"              : orgs.org_name,
+                        "state_id"          : orgs.state.id,
+                        "state"             : orgs.state.state_name,
+                        "district_id"       : orgs.district.id,
+                        "district"          : orgs.district.district_name,
+                        "category_id"       : orgs.sub.category.id,
+                        "category_name"     : orgs.sub.category.categories_name,
+                        "sub_category_id"   : orgs.sub.id,
+                        "sub_category_name" : orgs.sub.subcategories_name
+                    }
+            
+            final_response.append(response)
+            
+        
+        return True, final_response, "Organizations fetched successully"
+        
+        
+    except Exception as e:
+        print(f"Error in fetching organizations from database as {str(e)}")
+        return False, {}, str(e)
+
+def add_orgs(data):
+    try:
+        final_response = []
+        message = []
+        
+        for obj in data:
+            parent_subcategory = int(obj.get('sub_category'))
+            organization_name = obj.get('name')
+            state = obj.get('state')
+            district = obj.get('district')
+            
+            try:
+                if parent_subcategory and organization_name:
+                    organization_obj = TblOrganization.objects.filter(sub = parent_subcategory, org_name = organization_name).first()
+                    
+                    if organization_obj and (state or district):
+                        organization_obj.sub = parent_subcategory
+                        organization_obj.org_name = organization_name
+                        organization_obj.state = state if state else organization_obj.state
+                        organization_obj.district = district if district else organization_obj.district
+                        organization_obj.save()
+                        
+                        response = {
+                            "id"                : organization_obj.id,
+                            "name"              : organization_obj.org_name,
+                            "state_id"          : organization_obj.state.id,
+                            "state"             : organization_obj.state.state_name,
+                            "district_id"       : organization_obj.district.id,
+                            "district"          : organization_obj.district.district_name,
+                            "category_id"       : organization_obj.sub.category.id,
+                            "category_name"     : organization_obj.sub.category.categories_name,
+                            "sub_category_id"   : organization_obj.sub.id,
+                            "sub_category_name" : organization_obj.sub.subcategories_name
+                        }
+                        
+                        final_response.append(response)
+                    
+                    else:
+                        sub_category_object = TblSubcategories.objects.filter(id = parent_subcategory).first()
+                        if sub_category_object:
+                            organization_obj = TblOrganization(org_name = organization_name,
+                                                                    state = state,
+                                                                    district = district,
+                                                                    sub = sub_category_object)
+                        
+                            organization_obj.save()
+                            
+                            response = {
+                                "id"                : organization_obj.id,
+                                "name"              : organization_obj.org_name,
+                                "state_id"          : organization_obj.state.id,
+                                "state"             : organization_obj.state.state_name,
+                                "district_id"       : organization_obj.district.id,
+                                "district"          : organization_obj.district.district_name,
+                                "category_id"       : organization_obj.sub.category.id,
+                                "category_name"     : organization_obj.sub.category.categories_name,
+                                "sub_category_id"   : organization_obj.sub.id,
+                                "sub_category_name" : organization_obj.sub.subcategories_name
+                            }
+                            
+                            final_response.append(response)
+            
+            except Exception as e:
+                err_message = f"Error while adding organization :- {organization_name} as {str(e)}"
+                message.append(err_message)
+                
+            if message:
+                return True, final_response, message
+            
+            else:
+                return True, final_response, "organization Added successfully"
+                
+    except Exception as e:
+        print(f"Error in adding organization in database as {str(e)}")
+        return False, {}, str(e)
+
+def update_orgs(data):
+    try:
+        organization_id = data.get("id")
+        
+        if not organization_id:
+            raise Exception("organization_id id is none")
+        
+        organization_obj = TblOrganization.objects.filter(id = organization_id).first()
+        
+        if not organization_obj:
+            raise Exception("organization not found")
+        
+        for key, value in data.items():
+            if key == "name":
+                organization_obj.org_name = value
+            if key == "state":
+                organization_obj.state = value
+            if key == 'district':
+                organization_obj.district = value
+            if key == 'sub_id':
+                sub_category_object = TblSubcategories.objects.filter(id = value).first()
+                if sub_category_object:
+                    organization_obj.sub = sub_category_object
+                
+                
+            organization_obj.save()
+            
+        organization_obj.save()
+        
+        response = {
+                        "id"                : organization_obj.id,
+                        "name"              : organization_obj.org_name,
+                        "state_id"          : organization_obj.state.id,
+                        "state"             : organization_obj.state.state_name,
+                        "district_id"       : organization_obj.district.id,
+                        "district"          : organization_obj.district.district_name,
+                        "category_id"       : organization_obj.sub.category.id,
+                        "category_name"     : organization_obj.sub.category.categories_name,
+                        "sub_category_id"   : organization_obj.sub.id,
+                        "sub_category_name" : organization_obj.sub.subcategories_name
+                    }
+        
+        return True, response, "sub_category updated successfully"
+        
+    except Exception as e:
+        print(f"Error in updating sub_category in database as {str(e)}")
+        return False, {}, str(e)
+
+def delete_orgs(data):
+    try:
+        org_id = data.get("id")
+        
+        if not org_id:
+            raise Exception("organization id is none")
+        
+        organization_obj = TblOrganization.objects.filter(id=org_id).first()
+
+        if not organization_obj:
+            raise Exception("organization not found")
+        
+        TblProducts.objects.filter(organization=org_id).update(organization=None)
+
+        # Delete subcategories and then the category
+        organization_obj.delete()
+                
+        return True, {}, "organization deleted successfully"
+        
+    except Exception as e:
+        print(f"Error in deleting organization from database as {str(e)}")
+        return False, {}, str(e)
+
+
 
 
 def get_products(data):
@@ -350,11 +548,11 @@ def get_products(data):
             
         else:
             products_obj = TblProducts.objects.all()
-        images_list = ast.literal_eval(product_object.product_image)
         products_images = {}
-        for i in range(len(images_list)):
-            products_images[f"image_{i+1}"] = images_list[i]
         for product_object in products_obj:
+            images_list = ast.literal_eval(product_object.product_image)
+            for i in range(len(images_list)):
+                products_images[f"image_{i+1}"] = images_list[i]
             response = {
                             "id"                    : product_object.id,
                             "name"                  : product_object.product_name,

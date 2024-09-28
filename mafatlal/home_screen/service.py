@@ -469,16 +469,22 @@ def search_functionality_logic(data):
                 images_list = ast.literal_eval(product.product_image)
                 for i in range(len(images_list)):
                     products_images[f"image_{i+1}"] = images_list[i]
+            
+            size_dict = product.__dict__['size_available']
+            size_dict = json.dumps(size_dict)
             product = {
                 "id"                        : product.id,
                 "name"                      : product.product_name,
                 "img"                       : products_images,
+                "size_available"            : json.loads(size_dict),
+                "price"                     : product.price,
+                "description"               : product.description,      
                 "product_category_id"       : product.product_category.id if product.product_category else '',
                 "product_category_name"     : product.product_category.categories_name if product.product_category else '',
                 "product_subcategory_id"    : product.product_sub_category.id if product.product_sub_category else '',
                 "product_subcategory_name"  : product.product_sub_category.subcategories_name if product.product_sub_category else '',
                 "product_organization_id"   : product.organization.id if product.organization else '',
-                "product_organization_name" : product.organization.org_name if product.organization else ''
+                "product_organization_name" : product.organization.org_name if product.organization else ''        
             }
             
             products_info.append(product)
