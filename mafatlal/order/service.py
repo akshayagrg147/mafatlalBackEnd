@@ -5,6 +5,7 @@ from mafatlal import api_serializer
 from home_screen.service import product_info_logic
 from django.core import serializers as json_serializer
 import ast, datetime, json, math
+from dateutil.tz import gettz
 
 
 def order_history_logic(data):
@@ -31,9 +32,9 @@ def order_history_logic(data):
                 "order_status"          : order.order_status,
                 "shipping"              : None,
                 "billing"               : None,
-                "created_on"            : order.created_on,
+                "created_on"            : order.created_on.astimezone(gettz('Asia/Kolkata')) if order.created_on else '',
                 "created_by"            : order.created_by,
-                "updated_on"            : order.updated_on,
+                "updated_on"            : order.updated_on.astimezone(gettz('Asia/Kolkata')) if order.updated_on else '',
                 "updated_by"            : order.updated_by,
                 "tracking_url"          : order.tracking_url
             }
@@ -191,8 +192,8 @@ def order_place_logic(data):
                              order_status='Pending', 
                              shipping_address = shipping_obj if shipping_obj else None,
                              billing_address = billing_obj if billing_obj else None,
-                             created_on = datetime.datetime.now(datetime.timezone.utc), 
-                             updated_on = datetime.datetime.now(datetime.timezone.utc), 
+                             created_on = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')), 
+                             updated_on = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')), 
                              created_by = data['user_id'],
                              tracking_url = None)
         
@@ -207,9 +208,9 @@ def order_place_logic(data):
                 "order_status"          : order_obj.order_status,
                 "shipping"              : None,
                 "billing"               : None,
-                "created_on"            : order_obj.created_on,
+                "created_on"            : order_obj.created_on.astimezone(gettz('Asia/Kolkata')) if order_obj.created_on else '',
                 "created_by"            : order_obj.created_by,
-                "updated_on"            : order_obj.updated_on,
+                "updated_on"            : order_obj.updated_on.astimezone(gettz('Asia/Kolkata')) if order_obj.updated_on else '',
                 "updated_by"            : order_obj.updated_by,
                 "tracking_url"          : order_obj.tracking_url
             }
@@ -364,9 +365,9 @@ def order_status_update_logic(data):
                 "order_status"          : order_object.order_status,
                 "shipping"              : None,
                 "billing"               : None,
-                "created_on"            : order_object.created_on,
+                "created_on"            : order_object.created_on.astimezone(gettz('Asia/Kolkata')) if order_object.created_on else '',
                 "created_by"            : order_object.created_by,
-                "updated_on"            : order_object.updated_on,
+                "updated_on"            : order_object.updated_on.astimezone(gettz('Asia/Kolkata')) if order_object.updated_on else '',
                 "updated_by"            : order_object.updated_by,
                 "tracking_url"          : order_object.tracking_url
             }
@@ -449,7 +450,7 @@ def order_list_logic(data):
             customer_obj = TblUser.objects.filter(id = orders_objs[flag].user_id).first()
             response = {
                 "order_id"              : orders_objs[flag].id,
-                "created_on"            : orders_objs[flag].created_on,
+                "created_on"            : orders_objs[flag].created_on.astimezone(gettz('Asia/Kolkata')) if orders_objs[flag].created_on else '',
                 "customer_name"         : customer_obj.full_name if customer_obj else "",
                 "product_quantity"      : orders_objs[flag].product_quantity,
                 "user_id"               : orders_objs[flag].user_id,
@@ -461,7 +462,7 @@ def order_list_logic(data):
                 "shipping"              : None,
                 "billing"               : None,
                 "created_by"            : orders_objs[flag].created_by,
-                "updated_on"            : orders_objs[flag].updated_on,
+                "updated_on"            : orders_objs[flag].updated_on.astimezone(gettz('Asia/Kolkata')) if orders_objs[flag].updated_on else '',
                 "updated_by"            : orders_objs[flag].updated_by,
                 "tracking_url"          : orders_objs[flag].tracking_url
             }
@@ -539,7 +540,7 @@ def order_stats_logic(data):
         # Calculate total profit
         statistics = {}
         for order in order_objs:
-            date_key = order.created_on.strftime("%Y-%m-%d")
+            date_key = order.created_on.astimezone(gettz('Asia/Kolkata')).strftime("%Y-%m-%d") if order.created_on else ''
             
             total_profit += float(order.price)
             
@@ -549,7 +550,7 @@ def order_stats_logic(data):
             statistics[date_key].append({
                 "orderId": order.id,
                 "orderValue": order.price,
-                "createdAt": order.created_on
+                "createdAt": order.created_on.astimezone(gettz('Asia/Kolkata')) if order.created_on else ''
             })
             
         

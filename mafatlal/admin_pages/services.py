@@ -5,7 +5,7 @@ from login.models import TblUser
 import json
 from django.db.models import Q
 import ast
-
+from dateutil.tz import gettz
 
 # Categories Related Functions
 def get_category(user_id):
@@ -691,9 +691,9 @@ def add_products(user_id, data):
                         description=description,
                         product_image=str(product_images),
                         size_available=json.dumps(size),
-                        created_on=datetime.datetime.now(datetime.timezone.utc),
+                        created_on=datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
                         created_by=user_id,
-                        updated_on=datetime.datetime.now(datetime.timezone.utc),
+                        updated_on=datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
                         updated_by=user_id,
                         state   = state,
                         district    = district,
