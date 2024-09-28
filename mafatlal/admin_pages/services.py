@@ -1,8 +1,9 @@
-from .models import TblCategories, TblSubcategories, TblProducts, TblOrganization
+from .models import TblCategories, TblSubcategories, TblProducts, TblOrganization, TblState, TblDistrict
 from mafatlal.api_serializer import add_products_serializer
 import datetime
 from login.models import TblUser
 import json
+from django.db.models import Q
 import ast
 
 
@@ -136,8 +137,8 @@ def delete_category(data):
         if not category_id:
             raise Exception("Category id is none")
         
-        global_cat_obj = TblCategories.objects.filter(id = 9).first()
-        global_sub_obj = TblSubcategories.objects.filter(id = 8).first()
+        global_cat_obj = TblCategories.objects.filter(categories_name = "Global").first()
+        global_sub_obj = TblSubcategories.objects.filter(subcategories_name = "Global").first()
         
         category_object = TblCategories.objects.filter(id = category_id).first()
         
@@ -148,6 +149,9 @@ def delete_category(data):
 
         for sub_obj in sub_categories:
             TblProducts.objects.filter(product_sub_category=sub_obj.id).update(product_sub_category=global_sub_obj, product_category = global_cat_obj)
+        
+        for sub_cat in sub_categories:
+            TblOrganization.objects.filter(sub=sub_cat.id).update(sub=global_sub_obj)
 
         # Delete subcategories and then the category
         sub_categories.delete()
@@ -319,6 +323,7 @@ def delete_sub_category(data):
             raise Exception("sub_categories not found")
         
         TblProducts.objects.filter(product_sub_category=subcat_id).update(product_sub_category=global_sub_obj)
+        TblOrganization.objects.filter(sub=subcat_id).update(sub=global_sub_obj)
 
         # Delete subcategories and then the category
         sub_categories.delete()
@@ -373,78 +378,82 @@ def get_orgs(data):
         print(f"Error in fetching organizations from database as {str(e)}")
         return False, {}, str(e)
 
+# TODO to add the functionality for state and district if they are not present in db
 def add_orgs(data):
     try:
         final_response = []
         message = []
         
-        for obj in data:
-            parent_subcategory = int(obj.get('sub_category'))
-            organization_name = obj.get('name')
-            state = obj.get('state')
-            district = obj.get('district')
-            
-            try:
-                if parent_subcategory and organization_name:
-                    organization_obj = TblOrganization.objects.filter(sub = parent_subcategory, org_name = organization_name).first()
-                    
-                    if organization_obj and (state or district):
-                        organization_obj.sub = parent_subcategory
-                        organization_obj.org_name = organization_name
-                        organization_obj.state = state if state else organization_obj.state
-                        organization_obj.district = district if district else organization_obj.district
-                        organization_obj.save()
-                        
-                        response = {
-                            "id"                : organization_obj.id,
-                            "name"              : organization_obj.org_name,
-                            "state_id"          : organization_obj.state.id,
-                            "state"             : organization_obj.state.state_name,
-                            "district_id"       : organization_obj.district.id,
-                            "district"          : organization_obj.district.district_name,
-                            "category_id"       : organization_obj.sub.category.id,
-                            "category_name"     : organization_obj.sub.category.categories_name,
-                            "sub_category_id"   : organization_obj.sub.id,
-                            "sub_category_name" : organization_obj.sub.subcategories_name
-                        }
-                        
-                        final_response.append(response)
-                    
-                    else:
+        if data:
+            for obj in data:
+                parent_subcategory = int(obj.get('sub_category'))
+                organization_name = obj.get('name')
+                state = obj.get('state')
+                district = obj.get('district')
+                
+                try:
+                    if parent_subcategory and organization_name:
                         sub_category_object = TblSubcategories.objects.filter(id = parent_subcategory).first()
                         if sub_category_object:
-                            organization_obj = TblOrganization(org_name = organization_name,
-                                                                    state = state,
-                                                                    district = district,
-                                                                    sub = sub_category_object)
-                        
-                            organization_obj.save()
+                            organization_obj = TblOrganization.objects.filter(sub = parent_subcategory, org_name = organization_name).first()
                             
-                            response = {
-                                "id"                : organization_obj.id,
-                                "name"              : organization_obj.org_name,
-                                "state_id"          : organization_obj.state.id,
-                                "state"             : organization_obj.state.state_name,
-                                "district_id"       : organization_obj.district.id,
-                                "district"          : organization_obj.district.district_name,
-                                "category_id"       : organization_obj.sub.category.id,
-                                "category_name"     : organization_obj.sub.category.categories_name,
-                                "sub_category_id"   : organization_obj.sub.id,
-                                "sub_category_name" : organization_obj.sub.subcategories_name
-                            }
+                            if organization_obj:
+                                organization_obj.sub = sub_category_object
+                                organization_obj.org_name = organization_name
+                                organization_obj.state = state if state else organization_obj.state
+                                organization_obj.district = district if district else organization_obj.district
+                                organization_obj.save()
+                                
+                                response = {
+                                        "id"                : organization_obj.id,
+                                        "name"              : organization_obj.org_name,
+                                        "state_id"          : organization_obj.state.id if organization_obj.state else '',
+                                        "state"             : organization_obj.state.state_name if organization_obj.state else '',
+                                        "district_id"       : organization_obj.district.id if organization_obj.district else '',
+                                        "district"          : organization_obj.district.district_name if organization_obj.district else '',
+                                        "category_id"       : organization_obj.sub.category.id if organization_obj.sub and organization_obj.sub.category else '',
+                                        "category_name"     : organization_obj.sub.category.categories_name if organization_obj.sub and organization_obj.sub.category else '',
+                                        "sub_category_id"   : organization_obj.sub.id if organization_obj.sub else '',
+                                        "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
+                                    }
+                                
+                                final_response.append(response)
                             
-                            final_response.append(response)
-            
-            except Exception as e:
-                err_message = f"Error while adding organization :- {organization_name} as {str(e)}"
-                message.append(err_message)
+                            else:
+                                organization_obj = TblOrganization(org_name = organization_name,
+                                                                        state = state,
+                                                                        district = district,
+                                                                        sub = sub_category_object)
+                            
+                                organization_obj.save()
+                                
+                                response = {
+                                    "id"                : organization_obj.id,
+                                    "name"              : organization_obj.org_name,
+                                    "state_id"          : organization_obj.state.id if organization_obj.state else '',
+                                    "state"             : organization_obj.state.state_name if organization_obj.state else '',
+                                    "district_id"       : organization_obj.district.id if organization_obj.district else '',
+                                    "district"          : organization_obj.district.district_name if organization_obj.district else '',
+                                    "category_id"       : organization_obj.sub.category.id if organization_obj.sub and organization_obj.sub.category else '',
+                                    "category_name"     : organization_obj.sub.category.categories_name if organization_obj.sub and organization_obj.sub.category else '',
+                                    "sub_category_id"   : organization_obj.sub.id if organization_obj.sub else '',
+                                    "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
+                                }
+                                    
+                                final_response.append(response)
                 
-            if message:
-                return True, final_response, message
-            
-            else:
-                return True, final_response, "organization Added successfully"
+                except Exception as e:
+                    err_message = f"Error while adding organization :- {organization_name} as {str(e)}"
+                    message.append(err_message)
+                    
+                if message:
+                    return True, final_response, message
                 
+                else:
+                    return True, final_response, "organization Added successfully"
+            
+        return False, {}, "organization is empty"
+                    
     except Exception as e:
         print(f"Error in adding organization in database as {str(e)}")
         return False, {}, str(e)
@@ -479,17 +488,17 @@ def update_orgs(data):
         organization_obj.save()
         
         response = {
-                        "id"                : organization_obj.id,
-                        "name"              : organization_obj.org_name,
-                        "state_id"          : organization_obj.state.id,
-                        "state"             : organization_obj.state.state_name,
-                        "district_id"       : organization_obj.district.id,
-                        "district"          : organization_obj.district.district_name,
-                        "category_id"       : organization_obj.sub.category.id,
-                        "category_name"     : organization_obj.sub.category.categories_name,
-                        "sub_category_id"   : organization_obj.sub.id,
-                        "sub_category_name" : organization_obj.sub.subcategories_name
-                    }
+                    "id"                : organization_obj.id,
+                    "name"              : organization_obj.org_name,
+                    "state_id"          : organization_obj.state.id if organization_obj.state else '',
+                    "state"             : organization_obj.state.state_name if organization_obj.state else '',
+                    "district_id"       : organization_obj.district.id if organization_obj.district else '',
+                    "district"          : organization_obj.district.district_name if organization_obj.district else '',
+                    "category_id"       : organization_obj.sub.category.id if organization_obj.sub and organization_obj.sub.category else '',
+                    "category_name"     : organization_obj.sub.category.categories_name if organization_obj.sub and organization_obj.sub.category else '',
+                    "sub_category_id"   : organization_obj.sub.id if organization_obj.sub else '',
+                    "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
+                }
         
         return True, response, "sub_category updated successfully"
         
@@ -534,36 +543,45 @@ def get_products(data):
         if not user_obj:
             raise Exception("User is not present")
         
-        organization = data.get("organization")
+        category = data.get("category")
         sub_category = data.get('sub_category')
+        organization = data.get('organization')
         
-        if organization and sub_category:
-            products_obj = TblProducts.objects.filter(product_category = organization, product_sub_category = sub_category).all()
-            
-        elif organization:
-            products_obj = TblProducts.objects.filter(product_category = organization).all()
+        query = Q()
         
-        elif sub_category:
-            products_obj = TblProducts.objects.filter(product_sub_category = sub_category).all()
+        if category:
+            query &= Q(product_category=category)  # Using icontains for case-insensitive search
+
+        if sub_category:
+            query &= Q(product_sub_category=sub_category)
+
+        if organization:
+            query &= Q(organization=organization)
+        
+        if query:
+            products_obj = TblProducts.objects.filter(query)
             
         else:
             products_obj = TblProducts.objects.all()
+            
         products_images = {}
         for product_object in products_obj:
             images_list = ast.literal_eval(product_object.product_image)
             for i in range(len(images_list)):
                 products_images[f"image_{i+1}"] = images_list[i]
             response = {
-                            "id"                    : product_object.id,
-                            "name"                  : product_object.product_name,
-                            "organization_id"       : product_object.product_category_id,
-                            "organization_name"     : product_object.product_category.categories_name,
-                            "sub_category_id"       : product_object.product_sub_category_id,
-                            "sub_category_name"     : product_object.product_sub_category.subcategories_name,
-                            "price"                 : product_object.price,
-                            "description"           : product_object.description,
-                            "product_image"         : products_images,
-                            "size_available"        : product_object.size_available
+                        "id"                    : product_object.id,
+                        "name"                  : product_object.product_name,
+                        "organization_id"       : product_object.product_category_id if product_object.product_category else '',
+                        "organization_name"     : product_object.product_category.categories_name if product_object.product_category else '',
+                        "sub_category_id"       : product_object.product_sub_category_id if product_object.product_sub_category else '',
+                        "sub_category_name"     : product_object.product_sub_category.subcategories_name if product_object.product_sub_category else '',
+                        "product_organization_id"  : product_object.organization.id if product_object.organization else '',
+                        "product_organization"  : product_object.organization.org_name if product_object.organization else '',
+                        "price"                 : product_object.price,
+                        "description"           : product_object.description,
+                        "product_image"         : products_images,
+                        "size_available"        : product_object.size_available
                         }
             
             final_response.append(response)
@@ -584,82 +602,125 @@ def add_products(user_id, data):
             serializer = add_products_serializer(data=obj)
             serializer.is_valid(raise_exception=True)
             
-            product_name = obj.get('name')
-            product_category = obj.get('organization')
-            product_sub_category = obj.get('sub_category')
-            price = obj.get('price')
-            description = obj.get('description')
-            product_image = obj.get('image')
-            size = obj['size'] if 'size' in obj else {}
-            
-            if product_category and product_sub_category:
-                organization_object = TblCategories.objects.filter(id=product_category).first()
-                sub_category_object = TblSubcategories.objects.filter(id=product_sub_category).first()
-            
-            
-            if not product_category:
-                organization_object = TblCategories.objects.filter(id = 9).first()
-                product_category = organization_object.id
-                
-            if not product_sub_category:
-                sub_category_object = TblSubcategories.objects.filter(id=8).first()
-                product_sub_category = sub_category_object.id
-            
-                
-            product_object = TblProducts.objects.filter(
-                product_category=product_category,
-                product_sub_category=product_sub_category,
-                product_name=product_name,
-                created_by=user_id
-            ).first()
-
-            if not organization_object:
-                err_message = f"Error: Category with id {product_category} not found"
-                message.append(err_message)
-                continue
+            product_name            = obj.get('name')
+            product_category        = obj.get('category')
+            product_sub_category    = obj.get('sub_category')
+            product_organization    = obj.get('organization')
+            price                   = obj.get('price')
+            description             = obj.get('description')
+            product_image           = obj.get('image')
+            size                    = obj['size'] if 'size' in obj else {}
+            state                   = obj.get('state')
+            district                = obj.get('district')
             
             try:
+                if product_category and product_sub_category:
+                    category_object     = TblCategories.objects.filter(id=product_category).first()
+                    if not category_object:
+                        raise Exception(f"category not available as id {product_category}")
+                    
+                    sub_category_object = TblSubcategories.objects.filter(id=product_sub_category).first()
+                    if not sub_category_object:
+                        raise Exception(f"sub_category not available as id {product_sub_category}")
+                
+                
+                if not product_category:
+                    category_object = TblCategories.objects.filter(categories_name = "Global").first()
+                    product_category = category_object.id
+                    
+                if not product_sub_category:
+                    sub_category_object = TblSubcategories.objects.filter(subcategories_name = "Global").first()
+                    product_sub_category = sub_category_object.id
+                    
+                if product_organization:
+                    product_organization = TblOrganization.objects.filter(org_name = product_organization).first()
+                    if not product_organization:
+                        raise Exception(f"Organization not available as id {product_organization}")
+
+                    state = product_organization.state if not state else state
+                    
+                    district = product_organization.district if not district else district
+                
+                query = Q()
+                
+                if product_category:
+                    query &= Q(product_category=product_category)  # Using icontains for case-insensitive search
+
+                if product_sub_category:
+                    query &= Q(product_sub_category=product_sub_category)
+
+                if product_organization:
+                    query &= Q(organization=product_organization)
+                    
+                if state:
+                    query &= Q(organization=state)
+                    
+                if district:
+                    query &= Q(organization=district)
+                
+                
+                product_object = TblProducts.objects.filter(query).first()
+
+                product_images = []
+                if product_object and product_object.product_image:
+                    product_images.extend(ast.literal_eval(product_object.product_image))
+                    product_images.append(product_image)
+                    
+                else:
+                    product_images.append(product_image)
+                
                 if product_object:
                     # Update existing product
-                    product_object.product_name = product_name
-                    product_object.product_category = organization_object
+                    product_object.product_name         = product_name if product_name else product_object.product_name
+                    product_object.product_category     = category_object
                     product_object.product_sub_category = sub_category_object
-                    product_object.price = price
-                    product_object.description = description
-                    product_object.product_image = product_image
-                    product_object.size_available = json.dumps(size)
-                    product_object.updated_on = datetime.datetime.now(datetime.timezone.utc)
-                    product_object.updated_by = user_id
+                    product_object.organization         = product_organization
+                    product_object.price                = price if price else product_object.price
+                    product_object.description          = description if description else product_object.description
+                    product_object.product_image        = str(product_images)
+                    product_object.size_available       = json.dumps(size) if size else product_object.size_available
+                    product_object.updated_on           = datetime.datetime.now(datetime.timezone.utc)
+                    product_object.updated_by           = user_id
                 else:
                     # Create new product
                     product_object = TblProducts(
                         product_name=product_name,
-                        product_category=organization_object,
+                        product_category=category_object,
                         product_sub_category=sub_category_object,
                         price=price,
                         description=description,
-                        product_image=product_image,
+                        product_image=str(product_images),
                         size_available=json.dumps(size),
                         created_on=datetime.datetime.now(datetime.timezone.utc),
                         created_by=user_id,
                         updated_on=datetime.datetime.now(datetime.timezone.utc),
-                        updated_by=user_id
+                        updated_by=user_id,
+                        state   = state,
+                        district    = district,
+                        organization    = product_organization
                     )
                 
                 product_object.save()
                 
+                products_images = {}
+                images_list = ast.literal_eval(product_object.product_image)
+                for i in range(len(images_list)):
+                    products_images[f"image_{i+1}"] = images_list[i]
+                size_dict = product_object.__dict__['size_available']
                 response = {
-                    "id": product_object.id,
-                    "name": product_object.product_name,
-                    "organization_id": product_object.product_category_id,
-                    "organization_name": product_object.product_category.categories_name,
-                    "sub_category_id": product_object.product_sub_category_id,
-                    "sub_category_name": product_object.product_sub_category.subcategories_name,
-                    "price": product_object.price,
-                    "description": product_object.description,
-                    "product_image": product_object.product_image,
-                    "size_available": product_object.size_available
-                }
+                        "id"                    : product_object.id,
+                        "name"                  : product_object.product_name,
+                        "organization_id"       : product_object.product_category_id if product_object.product_category else '',
+                        "organization_name"     : product_object.product_category.categories_name if product_object.product_category else '',
+                        "sub_category_id"       : product_object.product_sub_category_id if product_object.product_sub_category else '',
+                        "sub_category_name"     : product_object.product_sub_category.subcategories_name if product_object.product_sub_category else '',
+                        "product_organization_id"  : product_object.organization.id if product_object.organization else '',
+                        "product_organization"  : product_object.organization.org_name if product_object.organization else '',
+                        "price"                 : product_object.price,
+                        "description"           : product_object.description,
+                        "product_image"         : products_images,
+                        "size_available"        : json.loads(size_dict)
+                        }
                 
                 final_response.append(response)
             
@@ -692,42 +753,80 @@ def update_products(data):
         for key, value in data.items():
             if key == "name":
                 product_object.product_name = value
+                
             elif key == "image":
-                product_object.product_image = value
+                product_images = []
+                if product_object and product_object.product_image:
+                    product_images.extend(ast.literal_eval(product_object.product_image))
+                    product_images.append(value)
+                else:
+                    product_images.append(value)
+                product_object.product_image = str(product_images)
+                
             elif key == "price":
                 product_object.price = value
+                
             elif key == "organization":
-                org_object = TblCategories.objects.filter(id=value).first()
+                org_object = TblOrganization.objects.filter(id=value).first()
                 if not org_object:
                     raise Exception("Organization not found")
-                product_object.product_category = org_object
+                product_object.organization = org_object
+                
             elif key == "sub_category":
                 sub_cat_object = TblSubcategories.objects.filter(id=value).first()
                 if not sub_cat_object:
                     raise Exception("Sub-category not found")
                 product_object.product_sub_category = sub_cat_object
+                
+            elif key == "category":
+                cat_object = TblCategories.objects.filter(id=value).first()
+                if not cat_object:
+                    raise Exception("category not found")
+                product_object.product_category = cat_object
+                
+            elif key == "state":
+                state_object = TblState.objects.filter(id=value).first()
+                if not state_object:
+                    raise Exception("state_object not found")
+                product_object.state = state_object
+                
+            elif key == "district":
+                district_object = TblDistrict.objects.filter(id=value).first()
+                if not district_object:
+                    raise Exception("district_object not found")
+                product_object.district = district_object
+                
             elif key == "description":
                 product_object.description = value
+                
             elif key == "size":
                 product_object.size_available = json.dumps(value)  # Ensure value is converted to a JSON string
             
         product_object.updated_by = data.get('user_id')
         product_object.size_available = json.dumps(product_object.size_available)
         product_object.save()
+        
+        products_images = {}
+        images_list = ast.literal_eval(product_object.product_image)
+        for i in range(len(images_list)):
+            products_images[f"image_{i+1}"] = images_list[i]
+        
+        size_dict = product_object.__dict__['size_available']
 
         response = {
-            "id": product_object.id,
-            "name": product_object.product_name,
-            "organization_id": product_object.product_category_id,
-            "organization_name": product_object.product_category.categories_name,
-            "sub_category_id": product_object.product_sub_category_id,
-            "sub_category_name": product_object.product_sub_category.subcategories_name,
-            "price": product_object.price,
-            "description": product_object.description,
-            "product_image": product_object.product_image,
-            "size_available": product_object.size_available,
-        }
-        
+                    "id"                    : product_object.id,
+                    "name"                  : product_object.product_name,
+                    "organization_id"       : product_object.product_category_id if product_object.product_category else '',
+                    "organization_name"     : product_object.product_category.categories_name if product_object.product_category else '',
+                    "sub_category_id"       : product_object.product_sub_category_id if product_object.product_sub_category else '',
+                    "sub_category_name"     : product_object.product_sub_category.subcategories_name if product_object.product_sub_category else '',
+                    "product_organization_id"  : product_object.organization.id if product_object.organization else '',
+                    "product_organization"  : product_object.organization.org_name if product_object.organization else '',
+                    "price"                 : product_object.price,
+                    "description"           : product_object.description,
+                    "product_image"         : products_images,
+                    "size_available"        : json.loads(size_dict)
+                    }
         return True, response, "Product updated successfully"
         
     except Exception as e:

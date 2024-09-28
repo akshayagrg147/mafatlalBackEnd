@@ -66,9 +66,8 @@ class Organisation(APIView):
         
         
         data = request.query_params
-        user_id = data['user_id'] if 'user_id' in data else None
         
-        status, response_data, message = get_orgs(user_id)
+        status, response_data, message = get_orgs(data)
         
         return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
     
@@ -81,9 +80,9 @@ class Organisation(APIView):
         data = json.loads(data)
         
         user_id = data.get('user_id')
-        organization_object = data['organizations']
+        organization_object = data.get('organizations')
                 
-        status, response_data, message = add_orgs(user_id, organization_object)
+        status, response_data, message = add_orgs(organization_object)
         
         return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
     
