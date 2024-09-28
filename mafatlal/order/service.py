@@ -346,7 +346,7 @@ def order_status_update_logic(data):
         
         order_object.order_status = status
         
-        if status == 'dispatched':
+        if status.lower() == 'dispatched':
             tracking_url = data['tracking_url'] if 'tracking_url' in data else None
             
             if not tracking_url:
