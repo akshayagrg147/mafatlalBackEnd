@@ -504,28 +504,23 @@ def order_list_logic(data):
 
 def order_stats_logic(data):
     try:
-        # Initialize totals
         total_profit = 0.0
         total_sale = 0.0
 
-        # Extract user ID from data
         user_id = data.get('user_id')
         if not user_id:
             raise ValueError("User can't be none")
         
-        # Fetch the user object
         user_obj = TblUser.objects.filter(id=user_id).first()
         if not user_obj:
             raise ValueError("No user found")
         
-        # Extract or set default dates
         from_date = data.get('from', datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0))
         to_date = data.get('to', datetime.datetime.now(datetime.timezone.utc))
         
         # Extract or set default order status
         order_status = data.get('status')
         
-        # Filter the orders based on the status if provided
         filter_args = {
             'created_on__gt': from_date,
             'created_on__lt': to_date
@@ -534,10 +529,8 @@ def order_stats_logic(data):
         if order_status:
             filter_args['order_status'] = order_status
         
-        # Calculate total sale count    
         order_objs = TblOrder.objects.filter(**filter_args).all()
 
-        # Calculate total profit
         statistics = {}
         for order in order_objs:
             date_key = order.created_on.astimezone(gettz('Asia/Kolkata')).strftime("%Y-%m-%d") if order.created_on else ''
@@ -575,6 +568,67 @@ def order_stats_logic(data):
         return False, None, str(e)
     
 
-
+def order_search_logic(data):
+    try:
+        final_response = []
+        search_id = data['search'].lower() if 'search' in data else None
+        
+        if not search_id:
+            raise Exception("search_id can't be null")
+        
+        order_object = TblOrder.objects.filter(id = search_id).first()
+        
+        if not order_object:
+            raise Exception("Order not found")
+        
+        customer_obj = TblUser.objects.filter(id = order_object.user_id).first()
+        response = {
+                "order_id"              : order_object.id,
+                "created_on"            : order_object.created_on.astimezone(gettz('Asia/Kolkata')) if order_object.created_on else '',
+                "customer_name"         : customer_obj.full_name if customer_obj else "",
+                "product_quantity"      : order_object.product_quantity,
+                "user_id"               : order_object.user_id,
+                "channel"               : "Online Store",
+                "price"                 : order_object.price,
+                "delievery_method"      : "Free Shipping" if float(order_object.price) > 500 else "Standard Shipping",
+                "description"           : order_object.description,
+                "order_status"          : order_object.order_status,
+                "shipping"              : None,
+                "billing"               : None,
+                "created_by"            : order_object.created_by,
+                "updated_on"            : order_object.updated_on.astimezone(gettz('Asia/Kolkata')) if order_object.updated_on else '',
+                "updated_by"            : order_object.updated_by,
+                "tracking_url"          : order_object.tracking_url
+            }
+            
+        if order_object.shipping_address:
+            response['shipping'] = {
+                                    "landmark"          : order_object.shipping_address.landmark if order_object.shipping_address else "",
+                                    "state"             : order_object.shipping_address.state if order_object.shipping_address else "",
+                                    "district"          : order_object.shipping_address.district if order_object.shipping_address else "",
+                                    "street_address_1"  : order_object.shipping_address.street_address_1 if order_object.shipping_address else "",
+                                    "street_address_2"  : order_object.shipping_address.street_address_2 if order_object.shipping_address else "",
+                                    "pincode"           : order_object.shipping_address.pincode if order_object.shipping_address else "",
+                                    "city"              : order_object.shipping_address.city if order_object.shipping_address else "",
+                                    "phone_number"      : order_object.shipping_address.phone_number if order_object.billing_address else ""
+                                        }
+        if order_object.billing_address:
+            response['billing'] = {
+                                    "landmark"          : order_object.billing_address.landmark if order_object.billing_address else "",
+                                    "state"             : order_object.billing_address.state if order_object.billing_address else "",
+                                    "district"          : order_object.billing_address.district if order_object.billing_address else "",
+                                    "street_address_1"  : order_object.billing_address.street_address_1 if order_object.billing_address else "",
+                                    "street_address_2"  : order_object.billing_address.street_address_2 if order_object.billing_address else "",
+                                    "pincode"           : order_object.billing_address.pincode if order_object.billing_address else "",
+                                    "city"              : order_object.billing_address.city if order_object.billing_address else "",
+                                    "phone_number"      : order_object.billing_address.phone_number if order_object.billing_address else ""
+                                    }
+        
+        final_response.append(response)
+        return True, final_response, "Order list fetch successfully"
+    
+    except Exception as e:
+        print(f"Error at order_search_logic api {str(e)}")
+        return False, None, str(e)
 
 
