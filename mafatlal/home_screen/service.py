@@ -108,7 +108,12 @@ def handle_product_info(cat_id = None):
                 "product_id"            : obj.__dict__['id'],
                 "Selected_category_id"  : category.id,
                 "product_name"          : obj.__dict__['product_name'],
-                "product_category"      : category.categories_name if category else 'Global',
+                "product_category_id"      : obj.product_category.id if obj.product_category else '',
+                "product_category"      : obj.product_category.categories_name if obj.product_category else '',
+                "product_sub_category_id"  : obj.product_sub_category.id if obj.product_sub_category else '',
+                "product_sub_category"  : obj.product_sub_category.subcategories_name if obj.product_sub_category else '',
+                "product_organization_id"  : obj.organization.id if obj.organization else '',
+                "product_organization"  : obj.organization.org_name if obj.organization else '',
                 "size_available"        : json.loads(size_dict),
                 "product_image"         : products_images,
                 "price"                 : obj.__dict__['price']
@@ -133,6 +138,8 @@ def product_info_logic(product_id):
         related_products_objs = TblProducts.objects.filter(product_sub_category_id = product_obj.product_sub_category_id).all()
         related_products = []
         for objs in related_products_objs:
+            size_dict = objs.__dict__['size_available']
+            size_dict = json.dumps(size_dict)
             product_category = TblCategories.objects.filter(id = int(objs.product_category_id)).first()
             product_sub_category = TblSubcategories.objects.filter(id = int(objs.product_sub_category_id)).first()
             images_list = ast.literal_eval(objs.__dict__['product_image'])
@@ -146,13 +153,17 @@ def product_info_logic(product_id):
                 'product_category'          : product_category.categories_name,
                 'product_sub_category_id'   : objs.product_sub_category_id,
                 'product_sub_category'      : product_category.categories_name,
-                'size_available'            : product_sub_category.subcategories_name,
+                'product_organization_id'   : objs.organization.id if objs.organization else '',
+                'product_organization'      : objs.organization.org_name if objs.organization else '',
+                'size_available'            : json.loads(size_dict),
                 'product_image'             : products_images,
                 'price'                     : objs.price,
                 'description'               : objs.description
             })
         
         if product_obj:
+            size_dict = product_obj.__dict__['size_available']
+            size_dict = json.dumps(size_dict)
             images_list = ast.literal_eval(product_obj.product_image)
             products_images = {}
             for i in range(len(images_list)):
@@ -163,7 +174,8 @@ def product_info_logic(product_id):
             final_response['name']                      = product_obj.product_name
             final_response['product_category']          = product_category.categories_name
             final_response['product_sub_category']      = product_sub_category.subcategories_name
-            final_response['size_available']            = product_obj.size_available
+            final_response['product_organization']      = product_obj.organization.org_name if product_obj.organization else ''
+            final_response['size_available']            = json.loads(size_dict)
             final_response['product_image']             = products_images
             final_response['price']                     = product_obj.price
             final_response['description']               = product_obj.description
@@ -218,6 +230,7 @@ def sub_catproduct_info_logic(data):
                     response = {
                         "product_id"            : obj.__dict__['id'],
                         "product_name"          : obj.__dict__['product_name'],
+                        "product_category_id"   : category.categories_name if category else 'Global',
                         "product_category"      : category.categories_name if category else 'Global',
                         "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
                         "size_available"        : json.loads(size_dict),
@@ -264,8 +277,12 @@ def sub_catproduct_info_logic(data):
                     response = {
                         "product_id"            : obj.__dict__['id'],
                         "product_name"          : obj.__dict__['product_name'],
-                        "product_category"      : category.categories_name if category else 'Global',
-                        "product_sub_category"  : product_sub_category.subcategories_name if product_sub_category else 'Global',
+                        "product_category_id"      : obj.product_category.id if obj.product_category else '',
+                        "product_category"      : obj.product_category.categories_name if obj.product_category else '',
+                        "product_sub_category_id"  : obj.product_sub_category.id if obj.product_sub_category else '',
+                        "product_sub_category"  : obj.product_sub_category.subcategories_name if obj.product_sub_category else '',
+                        "product_organization_id"  : obj.organization.id if obj.organization else '',
+                        "product_organization"  : obj.organization.org_name if obj.organization else '',
                         "size_available"        : json.loads(size_dict),
                         "product_image"         : products_images,
                         "price"                 : obj.__dict__['price']
