@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import string
 import json
 import requests
+from dateutil.tz import gettz
 
 def register_user(data):
     try:
@@ -41,9 +42,9 @@ def register_user(data):
                             district   = data['district'],
                             gst_number = data['gst'],
                             user_type  = user_type_obj.type_number if user_type_obj else 0,
-                            created_on  = datetime.now(timezone.utc),
+                            created_on  = datetime.now(timezone.utc).astimezone(gettz('Asia/Kolkata')),
                             created_by  = 'SYSTEM',
-                            updated_on  = datetime.now(timezone.utc),
+                            updated_on  = datetime.now(timezone.utc).astimezone(gettz('Asia/Kolkata')),
                             updated_by= 'SYSTEM')
         user_obj.save()
         
@@ -61,10 +62,10 @@ def register_user(data):
             "gst_number"        : user_obj.gst_number,
             "shipping"          : None,
             "billing"           : None,
-            "created_on"        : user_obj.created_on,
-            "updated_on"        : user_obj.updated_on,
+            "created_on"        : user_obj.created_on.astimezone(gettz('Asia/Kolkata')),
+            "created_by"        : user_obj.created_by,
             "updated_by"        : user_obj.updated_by,
-            "updated_on"        : user_obj.updated_on,
+            "updated_on"        : user_obj.updated_on.astimezone(gettz('Asia/Kolkata')),
         }
         if user_obj.shipping_address:
             response_obj['shipping'] = {
@@ -127,10 +128,10 @@ def login_check(data):
                 "shipping"          : None,
                 "billing"           : None,
                 "user_type"         : user_obj.user_type,
-                "created_on"        : user_obj.created_on,
-                "updated_on"        : user_obj.updated_on,
+                "created_on"        : user_obj.created_on.astimezone(gettz('Asia/Kolkata')),
+                "created_by"        : user_obj.created_by,
                 "updated_by"        : user_obj.updated_by,
-                "updated_on"        : user_obj.updated_on,
+                "updated_on"        : user_obj.updated_on.astimezone(gettz('Asia/Kolkata')),
             }
             
             if user_obj.shipping_address:
@@ -192,10 +193,10 @@ def user_info_logic(user_id):
             "gst_number"        : user_obj.gst_number,
             "shipping"          : None,
             "billing"           : None,
-            "created_on"        : user_obj.created_on,
-            "updated_on"        : user_obj.updated_on,
+            "created_on"        : user_obj.created_on.astimezone(gettz('Asia/Kolkata')),
+            "created_by"        : user_obj.created_by,
             "updated_by"        : user_obj.updated_by,
-            "updated_on"        : user_obj.updated_on,
+            "updated_on"        : user_obj.updated_on.astimezone(gettz('Asia/Kolkata')),
         }
         if user_obj.shipping_address:
             response_obj['shipping'] = {
@@ -235,7 +236,7 @@ def gst_number_verification(gst_number, pncd):
         if not gst_number:
             raise Exception("GST number can't be empty")
         
-        url = f"http://sheet.gstincheck.co.in/check/3845305c717a590e31e93d29bece8a0b/{gst_number}"
+        url = f"https://sheet.gstincheck.co.in/check/5ea61473434ca58d8ba865213ab33000/{gst_number}"
         # url = f"http://www.google.com"
         
         status = requests.get(url)

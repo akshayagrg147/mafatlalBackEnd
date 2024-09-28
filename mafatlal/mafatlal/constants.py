@@ -24,6 +24,11 @@ INITIATED_SUB_CATEGORY_ADD      = "Initaited the sub_category add api"
 INITIATED_SUB_CATEGORY_UPDATE   = "Initaited the sub_category update api"
 INITIATED_SUB_CATEGORY_DELETE   = "Initaited the sub_category delete api"
 
+INITIATED_CATEGORY_FETCH        = "Initaited the category fetch api"
+INITIATED_CATEGORY_ADD          = "Initaited the category add api"
+INITIATED_CATEGORY_UPDATE       = "Initaited the category update api"
+INITIATED_CATEGORY_DELETE       = "Initaited the category delete api"
+
 INITIATED_PRODUCTS_FETCH        = "Initaited the products fetch api"
 INITIATED_PRODUCTS_ADD          = "Initaited the products add api"
 INITIATED_PRODUCTS_UPDATE       = "Initaited the products update api"
