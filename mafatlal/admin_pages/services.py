@@ -531,7 +531,6 @@ def delete_orgs(data):
 
 
 
-
 def get_products(data):
     try:
         final_response = []
@@ -736,8 +735,7 @@ def add_products(user_id, data):
     except Exception as e:
         print(f"Error in adding product to the database: {str(e)}")
         return False, {}, str(e)
-
-      
+     
 def update_products(data):
     try:
         product_id = data.get("id")
@@ -833,7 +831,6 @@ def update_products(data):
         print(f"Error in updating product in database: {str(e)}")
         return False, {}, str(e)
 
-
 def delete_product(data):
     try:
         product_id = data.get("id")
@@ -855,6 +852,200 @@ def delete_product(data):
         return False, {}, str(e)
 
 
+def product_search_logic(data):
+    try:
+        final_response = []
+        search_id = data['search'].lower() if 'search' in data else None
+        
+        if not search_id:
+            raise Exception("search_id can't be null")
+        
+        is_id = True
+        try:
+            search_id = int(search_id)
+            is_id = True
+        
+        except Exception as e:
+            is_id = False
+            
+        if is_id:
+            products_obj = TblProducts.objects.filter(id = search_id).all()
+        
+        else:
+            products_obj = TblProducts.objects.filter(product_name__icontains = search_id).all()
+            
+        if not products_obj:
+            raise Exception("Products not found" if not is_id else "Product not found")
+        
+        for product in products_obj:
+            size_dict = product.__dict__['size_available']
+            size_dict = json.dumps(size_dict)
+            images_list = ast.literal_eval(product.__dict__['product_image'])
+            products_images = {}
+            for i in range(len(images_list)):
+                products_images[f"image_{i+1}"] = images_list[i]
+            response = {
+                "product_id"            : product.__dict__['id'],
+                "product_name"          : product.__dict__['product_name'],
+                "product_category_id"   : product.product_category.id if product.product_category else '',
+                "product_category"      : product.product_category.categories_name if product.product_category else '',
+                "product_sub_id"        : product.product_sub_category.id if product.product_sub_category else '',
+                "product_sub_category"  : product.product_sub_category.subcategories_name if product.product_sub_category else '',
+                "size_available"        : json.loads(size_dict),
+                "product_image"         : products_images,
+                "price"                 : product.__dict__['price'],
+            }
+            
+            if product.__dict__['district_id']:
+                response['district_id'] = product.__dict__['district_id']
+                response['district_name'] = product.district.district_name
+                response['state_id'] = product.district.state_id
+                response['state_name'] = product.district.state.state_name
+            
+            if product.__dict__['state_id']:
+                response['state_id'] = product.__dict__['state_id']
+                response['state_name'] = product.state.state_name
+                
+            if product.__dict__['organization_id']:
+                response['organization_id'] = product.__dict__['organization_id']
+                response['organization_name'] = product.organization.org_name
+                response['district_id'] = product.organization.district_id
+                response['district_name'] = product.organization.district.district_name
+                response['state_id'] = product.organization.state_id
+                response['state_name'] = product.organization.state.state_name
+            
+            final_response.append(response)
+            
+        return True, final_response, "Product fetch successfull"
 
-    
-    
+    except Exception as e:
+        print(f"Error in product_search_logic as  {str(e)}")
+        return False, {}, str(e)
+ 
+def organization_search_logic(data):
+    try:
+        final_response = []
+        search_id = data['search'].lower() if 'search' in data else None
+        
+        if not search_id:
+            raise Exception("search_id can't be null")
+        
+        is_id = True
+        try:
+            search_id = int(search_id)
+            is_id = True
+        
+        except Exception as e:
+            is_id = False
+            
+        if is_id:
+            organization_obj = TblOrganization.objects.filter(id = search_id).all()
+        
+        else:
+            organization_obj = TblOrganization.objects.filter(org_name__icontains = search_id).all()
+            
+        if not organization_obj:
+            raise Exception("Organizations not found" if not is_id else "Organization not found")
+        
+        for obj in organization_obj:
+            final_response.append({
+                                    'id'                : obj.id, 
+                                    'name'              : obj.org_name, 
+                                    'state_id'          : obj.state_id if obj.state else '', 
+                                    "state_name"        : obj.state.state_name if obj.state else '', 
+                                    'district_id'       : obj.district_id if obj.district else '', 
+                                    "district_name"     : obj.district.district_name if obj.district else '', 
+                                    "sub_category_id"   : obj.sub_id if obj.sub else '', 
+                                    "sub_category_name" : obj.sub.subcategories_name if obj.sub else ''})
+                
+        return 'Success', final_response, "All organizations found successfully"
+
+    except Exception as e:
+        print(f"Error in organization_search_logic as  {str(e)}")
+        return False, {}, str(e)
+ 
+def sub_category_search_logic(data):
+    try:
+        final_response = []
+        search_id = data['search'].lower() if 'search' in data else None
+        
+        if not search_id:
+            raise Exception("search_id can't be null")
+        
+        is_id = True
+        try:
+            search_id = int(search_id)
+            is_id = True
+        
+        except Exception as e:
+            is_id = False
+            
+        if is_id:
+            sub_category_obj = TblSubcategories.objects.filter(id = search_id).all()
+        
+        else:
+            sub_category_obj = TblSubcategories.objects.filter(subcategories_name__icontains = search_id).all()
+            
+        if not sub_category_obj:
+            raise Exception("Sub_categories not found" if not is_id else "Sub_category not found")
+        
+        for obj in sub_category_obj:
+            final_response.append({ 
+                                    "id"                    : obj.id,    
+                                    "subcategories_name"    : obj.subcategories_name,
+                                    "category_id"           : obj.category.id,
+                                    "category_name"         : obj.category.categories_name,
+                                    "image"                 : obj.image})
+                
+        return 'Success', final_response, "All Sub_category found successfully"
+
+    except Exception as e:
+        print(f"Error in sub_category_search_logic as  {str(e)}")
+        return False, {}, str(e)
+ 
+def category_search_logic(data):
+    try:
+        final_response = []
+        search_id = data['search'].lower() if 'search' in data else None
+        
+        if not search_id:
+            raise Exception("search_id can't be null")
+        
+        is_id = True
+        try:
+            search_id = int(search_id)
+            is_id = True
+        
+        except Exception as e:
+            is_id = False
+            
+        if is_id:
+            category_obj = TblCategories.objects.filter(id = search_id).all()
+        
+        else:
+            category_obj = TblCategories.objects.filter(categories_name__icontains = search_id).all()
+            
+        if not category_obj:
+            raise Exception("Categories not found" if not is_id else "Category not found")
+        
+        for obj in category_obj:
+            final_response.append({ 
+                                    "id"                    : obj.id,    
+                                    "category_name"         : obj.categories_name,
+                                    "image"                 : obj.image,
+                                    "state"                 : obj.state if obj.state else ''})
+                
+        return 'Success', final_response, "All Categories found successfully"
+
+    except Exception as e:
+        print(f"Error in category_search_logic as  {str(e)}")
+        return False, {}, str(e)
+ 
+
+ 
+
+
+ 
+
+
+   

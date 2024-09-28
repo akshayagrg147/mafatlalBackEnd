@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
 from home_screen.service import home_screen_logic
-from .services import get_sub_category, add_sub_category, update_sub_category, delete_sub_category, get_products, add_products, update_products, delete_product, get_category, add_category, update_category, delete_category, get_orgs, add_orgs, update_orgs, delete_orgs
+from .services import get_sub_category, add_sub_category, update_sub_category, delete_sub_category, get_products, add_products, update_products, delete_product, get_category, add_category, update_category, delete_category, get_orgs, add_orgs, update_orgs, delete_orgs, product_search_logic, organization_search_logic, sub_category_search_logic, category_search_logic
 import json
 
 
@@ -210,4 +210,51 @@ class Products(APIView):
         
         return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
         
+
+@api_view(['GET'])
+def product_search(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_PRODUCT_SEARCH_API)
+    
+    data = request.query_params
+    
+    status, response_data, message = product_search_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def organization_search(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_ORGANIZATION_SEARCH_API)
+    
+    data = request.query_params
+    
+    status, response_data, message = organization_search_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def sub_category_search(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_SUB_CATEGORY_SEARCH_API)
+    
+    data = request.query_params
+    
+    status, response_data, message = sub_category_search_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def category_search(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_CATEGORY_SEARCH_API)
+    
+    data = request.query_params
+    
+    status, response_data, message = category_search_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+        
+ 
+ 
       
