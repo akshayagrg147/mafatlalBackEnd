@@ -8,6 +8,7 @@ import json, ast
 import boto3
 from botocore.exceptions import NoCredentialsError
 from config import S3_config
+from django.db.models import Q
 
 
 def home_screen_logic(user_id = None, category_id = None, flag = 'external'):
@@ -424,42 +425,56 @@ def address_updation_logic(data):
         print(f"Error in the address_insertion_logic as {str(e)}")
         return 'Error', None, str(e)
     
-def search_category_logic(data):
+def search_functionality_logic(data):
     try:
         final_response = {}
-        categories_info = [] 
+        products_info = [] 
         
-        search_string = data['search'] if 'search' in data else None
+        search_string = data['search'].lower() if 'search' in data else None
         
         if not search_string:
             raise Exception("Search string can't be null")
         
+        query = Q(
+            product_name__icontains=search_string
+        ) | Q(
+            organization__org_name__icontains=search_string
+        ) | Q(
+            product_category__categories_name__icontains=search_string
+        ) | Q(
+            product_sub_category__subcategories_name__icontains=search_string
+        )
+        all_products = TblProducts.objects.filter(query).all()
         
-        all_categories = TblCategories.objects.filter(categories_name__icontains=search_string).all()
-        
-        for categories in all_categories:
-            category = {
-                "id"            : categories.id,
-                "name"          : categories.categories_name,
-                "img"           : categories.image,
-                "sub_categories": handle_sub_categories(categories.id)
+        for product in all_products:
+            products_images = {}
+            if product.product_image:
+                images_list = ast.literal_eval(product.product_image)
+                for i in range(len(images_list)):
+                    products_images[f"image_{i+1}"] = images_list[i]
+            product = {
+                "id"                        : product.id,
+                "name"                      : product.product_name,
+                "img"                       : products_images,
+                "product_category_id"       : product.product_category.id if product.product_category else '',
+                "product_category_name"     : product.product_category.categories_name if product.product_category else '',
+                "product_subcategory_id"    : product.product_sub_category.id if product.product_sub_category else '',
+                "product_subcategory_name"  : product.product_sub_category.subcategories_name if product.product_sub_category else '',
+                "product_organization_id"   : product.organization.id if product.organization else '',
+                "product_organization_name" : product.organization.org_name if product.organization else ''
             }
             
-            categories_info.append(category)
+            products_info.append(product)
             
             
-        final_response['categories'] = categories_info
-        
-        products_info = handle_product_info()
-        
         final_response['products'] = products_info
         
-        return 'Success', final_response, "All categories found successfully"
+        return 'Success', final_response, "All products found successfully"
             
         
     except Exception as e:
         print(constants.BREAKCODE)
-        print(f"!!! ERROR !!! Error with the search_category_logicc :- {str(e)} ##################")
+        print(f"!!! ERROR !!! Error with the search_functionality_logic :- {str(e)} ##################")
 
         return 'Error', None, str(e)
     

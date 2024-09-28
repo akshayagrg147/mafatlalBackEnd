@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
-from .service import home_screen_logic, product_info_logic,sub_catproduct_info_logic, product_info_list_logic, address_insertion_logic, address_updation_logic, search_category_logic, get_states, get_district, get_organizations, upload_images_logic
+from .service import home_screen_logic, product_info_logic,sub_catproduct_info_logic, product_info_list_logic, address_insertion_logic, address_updation_logic, search_functionality_logic, get_states, get_district, get_organizations, upload_images_logic
 import json
 
 @api_view(['GET'])
@@ -88,12 +88,12 @@ def address_operation(request):
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
 
 @api_view(['GET'])
-def search_category(request):
+def search_functionality(request):
     print(constants.BREAKCODE)
     
     data = request.query_params
     
-    status, response_data, message = search_category_logic(data)
+    status, response_data, message = search_functionality_logic(data)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
 
