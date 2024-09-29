@@ -561,8 +561,8 @@ def get_organizations(data):
             
         elif subcat:
             organization_ids_obj = TblProducts.objects.filter(product_sub_category = subcat).values("organization").all()
+            organization_ids = []
             if organization_ids_obj:
-                organization_ids = []
                 for ids in organization_ids_obj:
                     if ids['organization'] not in organization_ids and ids['organization']:
                         organization_ids.append(ids['organization'])
