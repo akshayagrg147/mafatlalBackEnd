@@ -551,20 +551,26 @@ def get_organizations(data):
         subcat = data['sub_id'] if 'sub_id' in data else None
         
         if state_id and district_id:
-            products_objs = TblOrganization.objects.filter(state_id = state_id, district_id = district_id).all()
+            organization_objs = TblOrganization.objects.filter(state_id = state_id, district_id = district_id).all()
         
         elif state_id:
-            products_objs = TblOrganization.objects.filter(state_id = state_id).all()
+            organization_objs = TblOrganization.objects.filter(state_id = state_id).all()
         
         elif district_id:
-            products_objs = TblOrganization.objects.filter(district_id = district_id).all()
+            organization_objs = TblOrganization.objects.filter(district_id = district_id).all()
             
         elif subcat:
-            products_objs = TblOrganization.objects.filter(sub_id = subcat).all()
-            
-            
-        if products_objs:
-            for obj in products_objs:
+            organization_ids_obj = TblProducts.objects.filter(product_sub_category = subcat).values("organization").all()
+            if organization_ids_obj:
+                organization_ids = []
+                for ids in organization_ids_obj:
+                    if ids['organization'] not in organization_ids and ids['organization']:
+                        organization_ids.append(ids['organization'])
+                        
+            organization_objs = TblOrganization.objects.filter(id__in=organization_ids).all()
+                    
+        if organization_objs:
+            for obj in organization_objs:
                 final_response.append({'id' : obj.id, 'name' : obj.org_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name, 'district_id' : obj.district_id, "district_name" : obj.district.district_name, "sub_category_id" : obj.sub_id, "sub_category_name" : obj.sub.subcategories_name})
                 
         return 'Success', final_response, "All organizations found successfully"

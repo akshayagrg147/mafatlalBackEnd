@@ -152,7 +152,9 @@ def delete_category(data):
         
         for sub_cat in sub_categories:
             TblOrganization.objects.filter(sub=sub_cat.id).update(sub=global_sub_obj)
-
+        
+        TblOrganization.objects.filter(category=category_id).update(category=global_cat_obj)
+            
         # Delete subcategories and then the category
         sub_categories.delete()
         category_object.delete()
@@ -347,25 +349,21 @@ def get_orgs(data):
         if not user_obj:
             raise Exception("User is not present")
         
-        sub_category = data.get('sub_category')
-        if sub_category:
-            organization_obj = TblOrganization.objects.filter(sub = sub_category).all()
-        
-        else:
-            organization_obj = TblOrganization.objects.all()
+        organization_obj = TblOrganization.objects.all()
         
         for orgs in organization_obj:
             response = {
                         "id"                : orgs.id,
                         "name"              : orgs.org_name,
-                        "state_id"          : orgs.state.id,
-                        "state"             : orgs.state.state_name,
-                        "district_id"       : orgs.district.id,
-                        "district"          : orgs.district.district_name,
-                        "category_id"       : orgs.sub.category.id,
-                        "category_name"     : orgs.sub.category.categories_name,
-                        "sub_category_id"   : orgs.sub.id,
-                        "sub_category_name" : orgs.sub.subcategories_name
+                        "image"             : orgs.image,
+                        "state_id"          : orgs.state.id if orgs.state else '',
+                        "state"             : orgs.state.state_name if orgs.state else '',
+                        "district_id"       : orgs.district.id if orgs.district else '',
+                        "district"          : orgs.district.district_name if orgs.district else '',
+                        "category_id"       : orgs.sub.category.id if orgs.sub and orgs.sub.category else '',
+                        "category_name"     : orgs.sub.category.categories_name if orgs.sub and orgs.sub.category else '',
+                        "sub_category_id"   : orgs.sub.id if orgs.sub else '',
+                        "sub_category_name" : orgs.sub.subcategories_name if orgs.sub else ''
                     }
             
             final_response.append(response)
@@ -386,61 +384,34 @@ def add_orgs(data):
         
         if data:
             for obj in data:
-                parent_subcategory = int(obj.get('sub_category'))
                 organization_name = obj.get('name')
                 state = obj.get('state')
                 district = obj.get('district')
+                image = obj.get('image')
                 
-                try:
-                    if parent_subcategory and organization_name:
-                        sub_category_object = TblSubcategories.objects.filter(id = parent_subcategory).first()
-                        if sub_category_object:
-                            organization_obj = TblOrganization.objects.filter(sub = parent_subcategory, org_name = organization_name).first()
-                            
-                            if organization_obj:
-                                organization_obj.sub = sub_category_object
-                                organization_obj.org_name = organization_name
-                                organization_obj.state = state if state else organization_obj.state
-                                organization_obj.district = district if district else organization_obj.district
-                                organization_obj.save()
-                                
-                                response = {
-                                        "id"                : organization_obj.id,
-                                        "name"              : organization_obj.org_name,
-                                        "state_id"          : organization_obj.state.id if organization_obj.state else '',
-                                        "state"             : organization_obj.state.state_name if organization_obj.state else '',
-                                        "district_id"       : organization_obj.district.id if organization_obj.district else '',
-                                        "district"          : organization_obj.district.district_name if organization_obj.district else '',
-                                        "category_id"       : organization_obj.sub.category.id if organization_obj.sub and organization_obj.sub.category else '',
-                                        "category_name"     : organization_obj.sub.category.categories_name if organization_obj.sub and organization_obj.sub.category else '',
-                                        "sub_category_id"   : organization_obj.sub.id if organization_obj.sub else '',
-                                        "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
-                                    }
-                                
-                                final_response.append(response)
-                            
-                            else:
-                                organization_obj = TblOrganization(org_name = organization_name,
-                                                                        state = state,
-                                                                        district = district,
-                                                                        sub = sub_category_object)
-                            
-                                organization_obj.save()
-                                
-                                response = {
-                                    "id"                : organization_obj.id,
-                                    "name"              : organization_obj.org_name,
-                                    "state_id"          : organization_obj.state.id if organization_obj.state else '',
-                                    "state"             : organization_obj.state.state_name if organization_obj.state else '',
-                                    "district_id"       : organization_obj.district.id if organization_obj.district else '',
-                                    "district"          : organization_obj.district.district_name if organization_obj.district else '',
-                                    "category_id"       : organization_obj.sub.category.id if organization_obj.sub and organization_obj.sub.category else '',
-                                    "category_name"     : organization_obj.sub.category.categories_name if organization_obj.sub and organization_obj.sub.category else '',
-                                    "sub_category_id"   : organization_obj.sub.id if organization_obj.sub else '',
-                                    "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
-                                }
-                                    
-                                final_response.append(response)
+                try:    
+                    organization_obj = TblOrganization(org_name = organization_name,
+                                                                    image = image,
+                                                                    state = state,
+                                                                    district = district)
+                        
+                    organization_obj.save()
+                    
+                    response = {
+                        "id"                : organization_obj.id,
+                        "name"              : organization_obj.org_name,
+                        "image"             : organization_obj.image,
+                        "state_id"          : organization_obj.state.id if organization_obj.state else '',
+                        "state"             : organization_obj.state.state_name if organization_obj.state else '',
+                        "district_id"       : organization_obj.district.id if organization_obj.district else '',
+                        "district"          : organization_obj.district.district_name if organization_obj.district else '',
+                        "category_id"       : organization_obj.sub.category.id if organization_obj.sub and organization_obj.sub.category else '',
+                        "category_name"     : organization_obj.sub.category.categories_name if organization_obj.sub and organization_obj.sub.category else '',
+                        "sub_category_id"   : organization_obj.sub.id if organization_obj.sub else '',
+                        "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
+                    }
+                        
+                    final_response.append(response)
                 
                 except Exception as e:
                     err_message = f"Error while adding organization :- {organization_name} as {str(e)}"
@@ -477,19 +448,24 @@ def update_orgs(data):
                 organization_obj.state = value
             if key == 'district':
                 organization_obj.district = value
+            if key == "image":
+                organization_obj.image = value
             if key == 'sub_id':
                 sub_category_object = TblSubcategories.objects.filter(id = value).first()
                 if sub_category_object:
                     organization_obj.sub = sub_category_object
+            if key == 'category':
+                category_object = TblCategories.objects.filter(id = value).first()
+                if category_object:
+                    organization_obj.category = category_object
                 
                 
             organization_obj.save()
-            
-        organization_obj.save()
         
         response = {
                     "id"                : organization_obj.id,
                     "name"              : organization_obj.org_name,
+                    "image"             : organization_obj.image,
                     "state_id"          : organization_obj.state.id if organization_obj.state else '',
                     "state"             : organization_obj.state.state_name if organization_obj.state else '',
                     "district_id"       : organization_obj.district.id if organization_obj.district else '',
@@ -613,6 +589,7 @@ def add_products(user_id, data):
             district                = obj.get('district')
             
             try:
+                product_organization_obj = None
                 if product_category and product_sub_category:
                     category_object     = TblCategories.objects.filter(id=product_category).first()
                     if not category_object:
@@ -632,13 +609,13 @@ def add_products(user_id, data):
                     product_sub_category = sub_category_object.id
                     
                 if product_organization:
-                    product_organization = TblOrganization.objects.filter(org_name = product_organization).first()
-                    if not product_organization:
+                    product_organization_obj = TblOrganization.objects.filter(id = product_organization).first()
+                    if not product_organization_obj:
                         raise Exception(f"Organization not available as id {product_organization}")
 
-                    state = product_organization.state if not state else state
+                    state = product_organization_obj.state if not state else state
                     
-                    district = product_organization.district if not district else district
+                    district = product_organization_obj.district if not district else district
                 
                 query = Q()
                 
@@ -652,10 +629,10 @@ def add_products(user_id, data):
                     query &= Q(organization=product_organization)
                     
                 if state:
-                    query &= Q(organization=state)
+                    query &= Q(state=state)
                     
                 if district:
-                    query &= Q(organization=district)
+                    query &= Q(district=district)
                 
                 
                 product_object = TblProducts.objects.filter(query).first()
@@ -673,7 +650,7 @@ def add_products(user_id, data):
                     product_object.product_name         = product_name if product_name else product_object.product_name
                     product_object.product_category     = category_object
                     product_object.product_sub_category = sub_category_object
-                    product_object.organization         = product_organization
+                    product_object.organization         = product_organization_obj if product_organization else product_object.organization
                     product_object.price                = price if price else product_object.price
                     product_object.description          = description if description else product_object.description
                     product_object.product_image        = str(product_images)
@@ -696,7 +673,7 @@ def add_products(user_id, data):
                         updated_by=user_id,
                         state   = state,
                         district    = district,
-                        organization    = product_organization
+                        organization    = product_organization_obj
                     )
                 
                 product_object.save()

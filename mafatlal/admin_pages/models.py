@@ -22,6 +22,8 @@ class TblOrganization(models.Model):
     state = models.ForeignKey('TblState', models.DO_NOTHING, blank=True, null=True)
     district = models.ForeignKey('TblDistrict', models.DO_NOTHING, blank=True, null=True)
     sub = models.ForeignKey('TblSubcategories', models.DO_NOTHING, blank=True, null=True)
+    category = models.ForeignKey('TblCategories', models.DO_NOTHING, db_column='category', blank=True, null=True)
+    image = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
