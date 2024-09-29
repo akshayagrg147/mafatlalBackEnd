@@ -640,10 +640,10 @@ def add_products(user_id, data):
                 product_images = []
                 if product_object and product_object.product_image:
                     product_images.extend(ast.literal_eval(product_object.product_image))
-                    product_images.append(product_image)
+                    product_images.extend(product_image)
                     
                 else:
-                    product_images.append(product_image)
+                    product_images.extend(product_image)
                 
                 if product_object:
                     # Update existing product
@@ -733,9 +733,9 @@ def update_products(data):
                 product_images = []
                 if product_object and product_object.product_image:
                     product_images.extend(ast.literal_eval(product_object.product_image))
-                    product_images.append(value)
+                    product_images.extend(value)
                 else:
-                    product_images.append(value)
+                    product_images.extend(value)
                 product_object.product_image = str(product_images)
                 
             elif key == "price":
