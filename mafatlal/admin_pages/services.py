@@ -389,11 +389,17 @@ def add_orgs(data):
                 district = obj.get('district')
                 image = obj.get('image')
                 
-                try:    
+                try:
+                    state_obj = None
+                    district_obj = None
+                    if state:
+                        state_obj = TblState.objects.filter(id = state).first()
+                    if district:
+                        district_obj = TblDistrict.objects.filter(id = district).first()
                     organization_obj = TblOrganization(org_name = organization_name,
                                                                     image = image,
-                                                                    state = state,
-                                                                    district = district)
+                                                                    state = state_obj,
+                                                                    district = district_obj)
                         
                     organization_obj.save()
                     
