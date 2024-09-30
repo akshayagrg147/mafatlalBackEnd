@@ -545,8 +545,8 @@ def get_products(data):
         else:
             products_obj = TblProducts.objects.all()
             
-        products_images = {}
         for product_object in products_obj:
+            products_images = {}
             images_list = ast.literal_eval(product_object.product_image)
             for i in range(len(images_list)):
                 products_images[f"image_{i+1}"] = images_list[i]

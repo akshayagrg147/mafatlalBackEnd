@@ -57,7 +57,7 @@ class TblProducts(models.Model):
     product_sub_category = models.ForeignKey(TblSubcategories, models.DO_NOTHING, db_column='product_sub_category', blank=True, null=True)
     price = models.CharField(max_length=10,blank=True, null=True)
     description = models.CharField(max_length=250, blank=True, null=True)
-    product_image = models.CharField(max_length=1000, blank=True, null=True)
+    product_image = models.CharField(max_length=3000, blank=True, null=True)
     size_available = models.TextField(blank=True, null=True)  # This field type is a guess.
     created_on = models.DateTimeField()
     created_by = models.CharField(max_length=50, blank=True, null=True)
