@@ -660,7 +660,7 @@ def add_products(user_id, data):
                     product_object.price                = price if price else product_object.price
                     product_object.description          = description if description else product_object.description
                     product_object.product_image        = str(product_images)
-                    product_object.size_available       = json.dumps(size) if size else product_object.size_available
+                    product_object.size_available       = json.dumps(size) if size else json.dumps(product_object.size_available)
                     product_object.updated_on           = datetime.datetime.now(datetime.timezone.utc)
                     product_object.updated_by           = user_id
                 else:
