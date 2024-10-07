@@ -595,6 +595,12 @@ def add_products(user_id, data):
             district                = obj.get('district')
             
             try:
+                if state:
+                    state = TblState.objects.filter(id = state).first()
+                    
+                if district:
+                    district = TblDistrict.objects.filter(id = district).first()
+                    
                 product_organization_obj = None
                 if product_category and product_sub_category:
                     category_object     = TblCategories.objects.filter(id=product_category).first()
