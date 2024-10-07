@@ -624,6 +624,8 @@ def add_products(user_id, data):
                     district = product_organization_obj.district if not district else district
                 
                 query = Q()
+                if product_name:
+                    query &= Q(product_name = product_name)
                 
                 if product_category:
                     query &= Q(product_category=product_category)  # Using icontains for case-insensitive search
