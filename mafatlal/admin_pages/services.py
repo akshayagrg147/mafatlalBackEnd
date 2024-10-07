@@ -641,8 +641,13 @@ def add_products(user_id, data):
                     
                 if district:
                     query &= Q(district=district)
+                    
+                if size:
+                    query &= Q(size=size)
                 
-                
+                if price:
+                    query &= Q(price=price)
+                    
                 product_object = TblProducts.objects.filter(query).first()
 
                 product_images = []
