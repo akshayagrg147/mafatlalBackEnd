@@ -794,7 +794,7 @@ def update_products(data):
                 product_object.description = value
                 
             elif key == "size":
-                product_object.size_available = json.dumps(value)  # Ensure value is converted to a JSON string
+                product_object.size_available = value  # Ensure value is converted to a JSON string
             
         product_object.updated_by = data.get('user_id')
         product_object.size_available = json.dumps(product_object.size_available)
