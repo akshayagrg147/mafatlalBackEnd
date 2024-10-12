@@ -750,11 +750,7 @@ def update_products(data):
                 
             elif key == "image":
                 product_images = []
-                if product_object and product_object.product_image:
-                    product_images.extend(ast.literal_eval(product_object.product_image))
-                    product_images.extend(value)
-                else:
-                    product_images.extend(value)
+                product_images.extend(value)
                 product_object.product_image = str(product_images)
                 
             elif key == "price":
