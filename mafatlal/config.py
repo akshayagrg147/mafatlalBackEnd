@@ -13,3 +13,8 @@ S3_config = {
     "AWS_SECRET_ACCESS_KEY" : config('AWS_SECRET_ACCESS_KEY'),
     "REGION_NAME"           : config('REGION_NAME'),
 }
+
+razor_pay_config = {
+    "KEY"       : config('RAZOR_PAY_KEY'),
+    "SECRET"    : config('RAZOR_PAY_SECRET')
+}

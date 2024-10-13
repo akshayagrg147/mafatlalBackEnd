@@ -6,7 +6,7 @@ class TblOrder(models.Model):
     product_quantity = models.IntegerField(blank=True, null=True)
     user_id = models.BigIntegerField()
     price = models.CharField(max_length=10, blank=True, null=True)
-    product_image = models.CharField(max_length=1000, blank=True, null=True)
+    product_image = models.CharField(max_length=3000, blank=True, null=True)
     description = models.CharField(max_length=250, blank=True, null=True)
     order_details = models.CharField(max_length=100, blank=True, null=True)
     size_available = models.CharField(max_length=100, blank=True, null=True)
@@ -18,6 +18,9 @@ class TblOrder(models.Model):
     tracking_url = models.CharField(max_length=100, blank=True, null=True)
     shipping_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='shipping_address', blank=True, null=True, related_name='shipping')
     billing_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='billing_address', blank=True, null=True, related_name='billing')
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    payment_status = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         managed = False

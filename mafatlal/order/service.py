@@ -6,7 +6,11 @@ from home_screen.service import product_info_logic
 from django.core import serializers as json_serializer
 import ast, datetime, json, math
 from dateutil.tz import gettz
+import razorpay
+from razorpay.errors import SignatureVerificationError
+from config import razor_pay_config
 
+client = razorpay.Client(auth=(razor_pay_config['RAZOR_PAY_KEY'], razor_pay_config['RAZOR_PAY_SECRET']))
 
 def order_history_logic(data):
     try:
@@ -183,7 +187,6 @@ def order_place_logic(data):
                     billing_obj.save()
                     
                     billing_obj = TblAddress.objects.filter(user_id = data['user_id'], address_type = "billing").first()
-                
         
         order_obj = TblOrder(product_quantity = len(data['products']), 
                              user_id = data['user_id'], 
@@ -198,8 +201,23 @@ def order_place_logic(data):
                              tracking_url = None)
         
         order_obj.save()
+        
+        # Implement RazorPay
+        order_data = {
+            'amount': data['price'],  # Amount in paise (e.g., 50000 paise = Rs 500)
+            'currency': 'INR',
+            'receipt': f'order_rcptid_{order_obj.id}',
+            'payment_capture': '1'  # Auto capture
+        }
+        payment = client.order.create(data=order_data)
+        
+        order_obj.razorpay_order_id = payment['id']
+        order_obj.payment_status = "Pending"
+        order_obj.save()
+
         response = {
                 "order_id"              : order_obj.id,
+                "razorpay_order_id"    : payment['id'],
                 "product_quantity"      : order_obj.product_quantity,
                 "user_id"               : order_obj.user_id,
                 "price"                 : order_obj.price,
@@ -631,4 +649,33 @@ def order_search_logic(data):
         print(f"Error at order_search_logic api {str(e)}")
         return False, None, str(e)
 
+def verify_payment_logic(request):
+    data = request.json
+    order_id = data['razorpay_order_id']
+    payment_id = data['razorpay_payment_id']
+    signature = data['razorpay_signature']
 
+    is_valid = verify_payment_signature(order_id, payment_id, signature)
+    
+    order_obj = TblOrder.objects.filter(razorpay_order_id = order_id).first()
+    if order_obj:
+        order_obj.razorpay_payment_id = payment_id
+        order_obj.payment_status = "Paid" if is_valid else "Fail"
+    
+    if is_valid:
+        return True, None, "Payment verified successfully"
+    else:
+        return False, None, "Payment verification failed"
+
+def verify_payment_signature(order_id, razorpay_payment_id, razorpay_signature):
+    params_dict = {
+        'razorpay_order_id': order_id,
+        'razorpay_payment_id': razorpay_payment_id,
+        'razorpay_signature': razorpay_signature
+    }
+
+    try:
+        client.utility.verify_payment_signature(params_dict)
+        return True
+    except SignatureVerificationError:
+        return False

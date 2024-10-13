@@ -11,6 +11,7 @@ INITAITED_ORDER_DETAILS_API         = "Initaited the order details api"
 INITAITED_PLACE_LIST_API            = "Initaited the place list api"
 INITAITED_ORDER_STATS_API           = "Initaited the order stats api"
 INITAITED_ORDER_SEARCH_API          = "Initaited the order search api"
+INITAITED_VERIFY_PAYMENT_API        = "Initaited the payment verify api"
 
 INITAITED_ADDRESS_UPDATE_API        = "Initaited Address update api"
 INITAITED_ADDRESS_INSERT_API        = "Initaited Address insert api"
