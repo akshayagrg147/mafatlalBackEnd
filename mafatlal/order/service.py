@@ -40,7 +40,10 @@ def order_history_logic(data):
                 "created_by"            : order.created_by,
                 "updated_on"            : order.updated_on.astimezone(gettz('Asia/Kolkata')) if order.updated_on else '',
                 "updated_by"            : order.updated_by,
-                "tracking_url"          : order.tracking_url
+                "tracking_url"          : order.tracking_url,
+                "razorpay_order_id"     : order.razorpay_order_id,
+                "payment_status"        : order.payment_status,
+                "razorpay_payment_id"   : order.razorpay_payment_id
             }
             if order.shipping_address:
                 response['shipping'] = {
@@ -322,16 +325,19 @@ def order_details_logic(order_id):
         
         user_obj = TblUser.objects.filter(id = order_object.user_id).first()
         
-        final_response['order_id']       = order_object.id
-        final_response['user_id']        = order_object.user_id
-        final_response['customer_name']  = user_obj.full_name if user_obj else ""
-        final_response['customer_email'] = user_obj.email if user_obj else ""
-        final_response['price']          = order_object.price
-        final_response['products']       = product_details
-        final_response['quantity']       = order_object.product_quantity
-        final_response['order_status']   = order_object.order_status
-        final_response['order_placed']   = order_object.created_on
-        final_response['tracking_url']   = order_object.tracking_url
+        final_response['order_id']              = order_object.id
+        final_response['user_id']               = order_object.user_id
+        final_response['customer_name']         = user_obj.full_name if user_obj else ""
+        final_response['customer_email']        = user_obj.email if user_obj else ""
+        final_response['price']                 = order_object.price
+        final_response['products']              = product_details
+        final_response['quantity']              = order_object.product_quantity
+        final_response['order_status']          = order_object.order_status
+        final_response['order_placed']          = order_object.created_on
+        final_response['tracking_url']          = order_object.tracking_url
+        final_response['razorpay_order_id']     = order_object.razorpay_order_id
+        final_response['payment_status']        = order_object.payment_status
+        final_response['razorpay_payment_id']   = order_object.razorpay_payment_id
         
         return True, final_response, "Order placed successfully"
     
@@ -387,7 +393,10 @@ def order_status_update_logic(data):
                 "created_by"            : order_object.created_by,
                 "updated_on"            : order_object.updated_on.astimezone(gettz('Asia/Kolkata')) if order_object.updated_on else '',
                 "updated_by"            : order_object.updated_by,
-                "tracking_url"          : order_object.tracking_url
+                "tracking_url"          : order_object.tracking_url,
+                "razorpay_order_id"     : order_object.razorpay_order_id,
+                "payment_status"        : order_object.payment_status,
+                "razorpay_payment_id"   : order_object.razorpay_payment_id
             }
         if order_object.shipping_address:
             response['shipping'] = {
@@ -482,7 +491,10 @@ def order_list_logic(data):
                 "created_by"            : orders_objs[flag].created_by,
                 "updated_on"            : orders_objs[flag].updated_on.astimezone(gettz('Asia/Kolkata')) if orders_objs[flag].updated_on else '',
                 "updated_by"            : orders_objs[flag].updated_by,
-                "tracking_url"          : orders_objs[flag].tracking_url
+                "tracking_url"          : orders_objs[flag].tracking_url,
+                "razorpay_order_id"     : orders_objs[flag].razorpay_order_id,
+                "payment_status"        : orders_objs[flag].payment_status,
+                "razorpay_payment_id"   : orders_objs[flag].razorpay_payment_id
             }
             
             if orders_objs[flag].shipping_address:
@@ -616,7 +628,10 @@ def order_search_logic(data):
                 "created_by"            : order_object.created_by,
                 "updated_on"            : order_object.updated_on.astimezone(gettz('Asia/Kolkata')) if order_object.updated_on else '',
                 "updated_by"            : order_object.updated_by,
-                "tracking_url"          : order_object.tracking_url
+                "tracking_url"          : order_object.tracking_url,
+                "razorpay_order_id"     : order_object.razorpay_order_id,
+                "payment_status"        : order_object.payment_status,
+                "razorpay_payment_id"   : order_object.razorpay_payment_id
             }
             
         if order_object.shipping_address:
