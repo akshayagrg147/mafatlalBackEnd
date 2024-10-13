@@ -15,6 +15,6 @@ S3_config = {
 }
 
 razor_pay_config = {
-    "KEY"       : config('RAZOR_PAY_KEY'),
-    "SECRET"    : config('RAZOR_PAY_SECRET')
+    "RAZOR_PAY_KEY"       : config('RAZOR_PAY_KEY'),
+    "RAZOR_PAY_SECRET"    : config('RAZOR_PAY_SECRET')
 }
