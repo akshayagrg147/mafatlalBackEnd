@@ -204,7 +204,7 @@ def order_place_logic(data):
         
         # Implement RazorPay
         order_data = {
-            'amount': data['price'],  # Amount in paise (e.g., 50000 paise = Rs 500)
+            'amount': int(float(data['price']) * 100), 
             'currency': 'INR',
             'receipt': f'order_rcptid_{order_obj.id}',
             'payment_capture': '1'  # Auto capture
@@ -650,7 +650,7 @@ def order_search_logic(data):
         return False, None, str(e)
 
 def verify_payment_logic(request):
-    data = request.json
+    data = request.data
     order_id = data['razorpay_order_id']
     payment_id = data['razorpay_payment_id']
     signature = data['razorpay_signature']
@@ -660,7 +660,10 @@ def verify_payment_logic(request):
     order_obj = TblOrder.objects.filter(razorpay_order_id = order_id).first()
     if order_obj:
         order_obj.razorpay_payment_id = payment_id
+        order_obj.order_status = "Placed" if is_valid else "Failed"
         order_obj.payment_status = "Paid" if is_valid else "Fail"
+        
+        order_obj.save()
     
     if is_valid:
         return True, None, "Payment verified successfully"
