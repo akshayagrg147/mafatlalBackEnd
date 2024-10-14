@@ -24,7 +24,7 @@ def order_history_logic(data):
         if not user_obj:
             raise ValueError("No user found")
         
-        orders_objs = TblOrder.objects.filter(user_id = user_id).all()
+        orders_objs = TblOrder.objects.filter(user_id = user_id).order_by('-created_on').all()
         
         for order in orders_objs:
             response = {
