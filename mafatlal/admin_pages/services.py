@@ -649,7 +649,7 @@ def add_products(user_id, data):
                     query &= Q(district=district)
                     
                 if size:
-                    query &= Q(size=size)
+                    query &= Q(size_available__contains={'size': size})
                 
                 if price:
                     query &= Q(price=price)
