@@ -578,6 +578,7 @@ def add_products(user_id, data):
     try:
         final_response = []
         message = []
+        print(f"Data is add+products is {data}")
         
         for obj in data:
             serializer = add_products_serializer(data=obj)
@@ -665,6 +666,7 @@ def add_products(user_id, data):
                     product_images.extend(product_image)
                 
                 if product_object:
+                    print(f"Product already available as {product_object.id}")
                     # Update existing product
                     product_object.product_name         = product_name if product_name else product_object.product_name
                     product_object.product_category     = category_object
@@ -678,6 +680,7 @@ def add_products(user_id, data):
                     product_object.updated_by           = user_id
                 else:
                     # Create new product
+                    print(f"Product created")
                     product_object = TblProducts(
                         product_name=product_name,
                         product_category=category_object,
