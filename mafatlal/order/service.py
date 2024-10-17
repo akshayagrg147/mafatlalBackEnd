@@ -1,6 +1,6 @@
 from .models import TblOrder
 from login.models import TblUser
-from home_screen.models import TblAddress
+from home_screen.models import TblAddress, TblProducts, TblCategories
 from mafatlal import api_serializer
 from home_screen.service import product_info_logic
 from django.core import serializers as json_serializer
@@ -90,8 +90,13 @@ def order_place_logic(data):
             
         products_list = []
         for products in data['products']:
+            product_info = TblProducts.objects.filter(id = products['product_id']).first()
+            if not product_info:
+                raise Exception("Product Not Found")
+            product_category = TblCategories.objects.filter(id = int(product_info.product_category.id)).first()
             product_obj = {
                 "product_id"    : products['product_id'],
+                "product_info"  : {"product_image" : product_info.product_image, "name" : product_info.product_name, "product_category" : product_category.categories_name if product_category else ""},
                 "quantity"      : products['quantity'],
                 "price"         : products['price']
             }
@@ -283,18 +288,19 @@ def order_details_logic(order_id):
         product_details = []
         if order_object.order_details:
             for products in ast.literal_eval(order_object.order_details):
+                images_list = ast.literal_eval(products['product_info']['product_image'])
+                products_images = {}
+                for i in range(len(images_list)):
+                    products_images[f"image_{i+1}"] = images_list[i]
                 product_info = {}
-                status, response_data, message = product_info_logic(products['product_id'])
-                print(f"Status and message for product id {products['product_id']} is {status} {message}")
-                if response_data:
-                    product_info['product_id']          = products['product_id']
-                    product_info['quantity']            = products['quantity']
-                    product_info['price']               = products['price']
-                    product_info['product_image']       = response_data['product_image']
-                    product_info['product_name']        = response_data['name']
-                    product_info['product_category']    = response_data['product_category']
-                    if 'size' in products:
-                        product_info['size'] = products['size']
+                product_info['product_id']          = products['product_id']
+                product_info['quantity']            = products['quantity']
+                product_info['price']               = products['price']
+                product_info['product_image']       = products_images
+                product_info['product_name']        = products['product_info']['name']
+                product_info['product_category']    = products['product_info']['product_category']
+                if 'size' in products:
+                    product_info['size'] = products['size']
                 product_details.append(product_info)
         
         final_response['shipping'] = None
