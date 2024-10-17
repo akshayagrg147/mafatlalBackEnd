@@ -251,11 +251,11 @@ def sub_catproduct_info_logic(data):
                         
                     if obj.__dict__['organization_id']:
                         response['organization_id'] = obj.__dict__['organization_id']
-                        response['organization_name'] = obj.organization.org_name
-                        response['district_id'] = obj.organization.district_id
-                        response['district_name'] = obj.organization.district.district_name
-                        response['state_id'] = obj.organization.state_id
-                        response['state_name'] = obj.organization.state.state_name
+                        response['organization_name'] = obj.organization.org_name if obj.organization.org_name else ""
+                        response['district_id'] = obj.organization.district_id if obj.organization.district_id else ""
+                        response['district_name'] = obj.organization.district.district_name if obj.organization.district else ""
+                        response['state_id'] = obj.organization.state_id if obj.organization.state_id else ""
+                        response['state_name'] = obj.organization.state.state_name if obj.organization.state else ""
                     
                     final_response.append(response)
             
