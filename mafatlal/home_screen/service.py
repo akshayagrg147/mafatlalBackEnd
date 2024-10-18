@@ -572,7 +572,16 @@ def get_organizations(data):
                     
         if organization_objs:
             for obj in organization_objs:
-                final_response.append({'id' : obj.id, 'name' : obj.org_name, 'state_id' : obj.state_id, "state_name" : obj.state.state_name, 'district_id' : obj.district_id, "district_name" : obj.district.district_name, "sub_category_id" : obj.sub_id, "sub_category_name" : obj.sub.subcategories_name})
+                final_response.append({
+                                        'id'                : obj.id, 
+                                        'name'              : obj.org_name, 
+                                        'state_id'          : obj.state_id if obj.state_id else "", 
+                                        "state_name"        : obj.state.state_name if obj.state else "", 
+                                        'district_id'       : obj.district_id if obj.district_id else "", 
+                                        "district_name"     : obj.district.district_name if obj.district else "", 
+                                        "sub_category_id"   : obj.sub_id if obj.sub else "", 
+                                        "sub_category_name" : obj.sub.subcategories_name if obj.sub else ""
+                                    })
                 
         return 'Success', final_response, "All organizations found successfully"
 

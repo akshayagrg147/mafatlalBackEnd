@@ -89,10 +89,10 @@ def add_category(user_id, data):
             return True, final_response, message
         
         else:
-            return True, final_response, "Organization Added successfully"
+            return True, final_response, "Category Added successfully"
                 
     except Exception as e:
-        print(f"Error in adding organization in database as {str(e)}")
+        print(f"Error in adding category in database as {str(e)}")
         return False, {}, str(e)
     
 def update_category(data):
@@ -127,7 +127,7 @@ def update_category(data):
         return True, response, "Category updated successfully"
         
     except Exception as e:
-        print(f"Error in updating organization in database as {str(e)}")
+        print(f"Error in updating category in database as {str(e)}")
         return False, {}, str(e)
     
 def delete_category(data):
@@ -162,7 +162,7 @@ def delete_category(data):
         return True, {}, "Category deleted successfully"
         
     except Exception as e:
-        print(f"Error in updating organization in database as {str(e)}")
+        print(f"Error in deleting category in database as {str(e)}")
         return False, {}, str(e)
 
 
@@ -451,9 +451,13 @@ def update_orgs(data):
             if key == "name":
                 organization_obj.org_name = value
             if key == "state":
-                organization_obj.state = value
+                state_obj = TblState.objects.filter(id = value).first()
+                if state_obj:
+                    organization_obj.state = state_obj
             if key == 'district':
-                organization_obj.district = value
+                district_obj = TblState.objects.filter(id = value).first()
+                if district_obj:
+                    organization_obj.district = district_obj
             if key == "image":
                 organization_obj.image = value
             if key == 'sub_id':
@@ -482,10 +486,10 @@ def update_orgs(data):
                     "sub_category_name" : organization_obj.sub.subcategories_name if organization_obj.sub else ''
                 }
         
-        return True, response, "sub_category updated successfully"
+        return True, response, "Organzation updated successfully"
         
     except Exception as e:
-        print(f"Error in updating sub_category in database as {str(e)}")
+        print(f"Error in updating Organzation in database as {str(e)}")
         return False, {}, str(e)
 
 def delete_orgs(data):
