@@ -117,7 +117,8 @@ def handle_product_info(cat_id = None):
                 "product_organization"  : obj.organization.org_name if obj.organization else '',
                 "size_available"        : json.loads(size_dict),
                 "product_image"         : products_images,
-                "price"                 : obj.__dict__['price']
+                "price"                 : obj.__dict__['price'],
+                "gst_percentage"        : obj.gst_percentage
             }
             
             final_response.append(response)
@@ -160,7 +161,8 @@ def product_info_logic(product_id):
                     'size_available'            : json.loads(size_dict),
                     'product_image'             : products_images,
                     'price'                     : objs.price,
-                    'description'               : objs.description
+                    'description'               : objs.description,
+                    "gst_percentage"            : objs.gst_percentage
                 })
             
             if product_obj:
@@ -181,6 +183,7 @@ def product_info_logic(product_id):
                 final_response['product_image']             = products_images
                 final_response['price']                     = product_obj.price
                 final_response['description']               = product_obj.description
+                final_response['gst_percentage']            = product_obj.gst_percentage
                 final_response['related_products']          = related_products
             
         return 'Success', final_response, 'Product data fetched successfully'
@@ -238,6 +241,7 @@ def sub_catproduct_info_logic(data):
                         "size_available"        : json.loads(size_dict),
                         "product_image"         : products_images,
                         "price"                 : obj.__dict__['price'],
+                        "gst_percentage"        : obj.gst_percentage
                     }
                     
                     if obj.__dict__['district_id']:
@@ -287,7 +291,8 @@ def sub_catproduct_info_logic(data):
                         "product_organization"  : obj.organization.org_name if obj.organization else '',
                         "size_available"        : json.loads(size_dict),
                         "product_image"         : products_images,
-                        "price"                 : obj.__dict__['price']
+                        "price"                 : obj.__dict__['price'],
+                        "gst_percentage"        : obj.gst_percentage
                     }
                     
                     final_response.append(response)
@@ -486,7 +491,8 @@ def search_functionality_logic(data):
                 "product_subcategory_id"    : product.product_sub_category.id if product.product_sub_category else '',
                 "product_subcategory_name"  : product.product_sub_category.subcategories_name if product.product_sub_category else '',
                 "product_organization_id"   : product.organization.id if product.organization else '',
-                "product_organization_name" : product.organization.org_name if product.organization else ''        
+                "product_organization_name" : product.organization.org_name if product.organization else '',       
+                "gst_percentage"            : product.gst_percentage,       
             }
             
             products_info.append(product)

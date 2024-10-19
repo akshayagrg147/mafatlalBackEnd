@@ -572,7 +572,8 @@ def get_products(data):
                         "price"                 : product_object.price,
                         "description"           : product_object.description,
                         "product_image"         : products_images,
-                        "size_available"        : product_object.size_available
+                        "size_available"        : product_object.size_available,
+                        "gst_percentage"        : product_object.gst_percentage
                         }
             
             final_response.append(response)
@@ -604,6 +605,7 @@ def add_products(user_id, data):
             size                    = obj['size'] if 'size' in obj else {}
             state                   = obj.get('state')
             district                = obj.get('district')
+            gst_percentage          = obj.get('gst_percentage')
             
             try:
                 if state:
@@ -688,24 +690,26 @@ def add_products(user_id, data):
                     product_object.size_available       = json.dumps(size) if size else json.dumps(product_object.size_available)
                     product_object.updated_on           = datetime.datetime.now(datetime.timezone.utc)
                     product_object.updated_by           = user_id
+                    product_object.gst_percentage       = gst_percentage
                 else:
                     # Create new product
                     print(f"Product created")
                     product_object = TblProducts(
-                        product_name=product_name,
-                        product_category=category_object,
-                        product_sub_category=sub_category_object,
-                        price=price,
-                        description=description,
-                        product_image=str(product_images),
-                        size_available=json.dumps(size),
-                        created_on=datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
-                        created_by=user_id,
-                        updated_on=datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
-                        updated_by=user_id,
-                        state   = state,
-                        district    = district,
-                        organization    = product_organization_obj
+                        product_name        = product_name,
+                        product_category    = category_object,
+                        product_sub_category= sub_category_object,
+                        price               = price,
+                        description         = description,
+                        product_image       = str(product_images),
+                        size_available      = json.dumps(size),
+                        created_on          = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
+                        created_by          = user_id,
+                        updated_on          = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
+                        updated_by          = user_id,
+                        state               = state,
+                        district            = district,
+                        organization        = product_organization_obj,
+                        gst_percentage      = gst_percentage
                     )
                 
                 product_object.save()
@@ -727,7 +731,8 @@ def add_products(user_id, data):
                         "price"                 : product_object.price,
                         "description"           : product_object.description,
                         "product_image"         : products_images,
-                        "size_available"        : json.loads(size_dict)
+                        "size_available"        : json.loads(size_dict),
+                        "gst_percentage"        : product_object.gst_percentage,
                         }
                 
                 final_response.append(response)
@@ -804,6 +809,8 @@ def update_products(data):
                 
             elif key == "size":
                 product_object.size_available = value  # Ensure value is converted to a JSON string
+            elif key == "gst_percentage":
+                product_object.gst_percentage = value 
             
         product_object.updated_by = data.get('user_id')
         product_object.size_available = json.dumps(product_object.size_available)
@@ -828,7 +835,8 @@ def update_products(data):
                     "price"                 : product_object.price,
                     "description"           : product_object.description,
                     "product_image"         : products_images,
-                    "size_available"        : json.loads(size_dict)
+                    "size_available"        : json.loads(size_dict),
+                    "gst_percentage"        : product_object.gst_percentage
                     }
         return True, response, "Product updated successfully"
         
@@ -899,6 +907,7 @@ def product_search_logic(data):
                 "size_available"        : json.loads(size_dict),
                 "product_image"         : products_images,
                 "price"                 : product.__dict__['price'],
+                "gst_percentage"        : product.gst_percentage
             }
             
             if product.__dict__['district_id']:
