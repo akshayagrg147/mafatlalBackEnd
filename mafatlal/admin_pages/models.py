@@ -47,6 +47,7 @@ class TblSubcategories(models.Model):
     image = models.CharField(max_length=100, blank=True, null=True)
     created_by = models.BigIntegerField(blank=True, null=True)
     updated_by = models.BigIntegerField(blank=True, null=True)
+    banner_images = models.CharField(max_length=5000, blank=True, null=True)
 
     class Meta:
         managed = False

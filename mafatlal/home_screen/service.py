@@ -75,6 +75,7 @@ def handle_sub_categories(cat_id=None):
             "id"                : category.id,
             "name"              : category.subcategories_name,
             "img"               : category.image,
+            "banner_image"      : ast.literal_eval(category.banner_images),
             "is_district"       : True if is_district else False,
             "is_state"          : True if is_state else False,
             "is_organization"   : True if is_organization else False

@@ -47,12 +47,11 @@ def add_category(user_id, data):
             category_image = obj.get('image')
             
             try:
-                if category_name and category_image:
+                if category_name:
                     cat_object = TblCategories.objects.filter(categories_name = category_name, created_by = user_id).first()
                     
                     if cat_object:
                         cat_object.categories_name = category_name
-                        cat_object.image = category_image
                         cat_object.updated_by = user_id
                         cat_object.save()
                         
@@ -66,7 +65,6 @@ def add_category(user_id, data):
                     
                     else:
                         category_object = TblCategories(categories_name = category_name,
-                                                        image = category_image,
                                                         created_by = user_id)
                     
                         category_object.save()
@@ -190,6 +188,7 @@ def get_sub_category(data):
                         "id"                : sub_obj.id,
                         "name"              : sub_obj.subcategories_name,
                         "image"             : sub_obj.image,
+                        "banner_image"      : ast.literal_eval(sub_obj.banner_images),
                         "organization_id"   : sub_obj.category_id,
                         "organization_name" : sub_obj.category.categories_name
                     }
@@ -213,6 +212,7 @@ def add_sub_category(user_id, data):
             parent_category = int(obj.get('category'))
             sub_category_name = obj.get('name')
             sub_category_image = obj.get('image')
+            sub_category_banner_image = obj.get('banner_images', "[]")
             
             try:
                 if parent_category and sub_category_name and sub_category_image:
@@ -221,6 +221,7 @@ def add_sub_category(user_id, data):
                     if subcat_object:
                         subcat_object.subcategories_name = sub_category_name
                         subcat_object.image = sub_category_image
+                        subcat_object.banner_images = sub_category_banner_image
                         subcat_object.updated_by = user_id
                         subcat_object.save()
                         
@@ -228,6 +229,7 @@ def add_sub_category(user_id, data):
                             "id"                : subcat_object.id,
                             "name"              : subcat_object.subcategories_name,
                             "image"             : subcat_object.image,
+                            "banner_images"     : ast.literal_eval(subcat_object.banner_images),
                             "category_id"       : subcat_object.category,
                             "category_name"     : subcat_object.category.categories_name
                         }
@@ -240,6 +242,7 @@ def add_sub_category(user_id, data):
                             sub_category_object = TblSubcategories(subcategories_name = sub_category_name,
                                                                 category = organization_object,
                                                                 image = sub_category_image,
+                                                                banner_images = sub_category_banner_image,
                                                                 created_by = user_id)
                     
                             sub_category_object.save()
@@ -250,6 +253,7 @@ def add_sub_category(user_id, data):
                                 "id"                : subcat_object.id,
                                 "name"              : subcat_object.subcategories_name,
                                 "image"             : subcat_object.image,
+                                "banner_image"      : ast.literal_eval(subcat_object.banner_images),
                                 "category_id"       : subcat_object.category_id,
                                 "category_name"     : subcat_object.category.categories_name
                             }
@@ -290,6 +294,8 @@ def update_sub_category(data):
                 subcategory_object.subcategories_name = value
             if key == "image":
                 subcategory_object.image = value
+            if key == "banner_images":
+                subcategory_object.banner_images = str(value)
                 
             subcategory_object.save()
             
@@ -300,6 +306,7 @@ def update_sub_category(data):
                     "id"                : subcategory_object.id,
                     "name"              : subcategory_object.subcategories_name,
                     "image"             : subcategory_object.image,
+                    "banner_image"      : ast.literal_eval(subcategory_object.banner_images),
                     "category_id"       : subcategory_object.category_id,
                     "category_name"     : subcategory_object.category.categories_name
                 }
@@ -397,7 +404,6 @@ def add_orgs(data):
                     if district:
                         district_obj = TblDistrict.objects.filter(id = district).first()
                     organization_obj = TblOrganization(org_name = organization_name,
-                                                                    image = image,
                                                                     state = state_obj,
                                                                     district = district_obj)
                         
