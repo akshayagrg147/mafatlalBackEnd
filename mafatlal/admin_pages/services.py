@@ -779,6 +779,8 @@ def update_products(data):
                 if not org_object:
                     raise Exception("Organization not found")
                 product_object.organization = org_object
+                product_object.state = org_object.state
+                product_object.district = org_object.district
                 
             elif key == "sub_category":
                 sub_cat_object = TblSubcategories.objects.filter(id=value).first()

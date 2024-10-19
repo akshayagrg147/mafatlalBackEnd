@@ -24,7 +24,7 @@ def order_history_logic(data):
         if not user_obj:
             raise ValueError("No user found")
         
-        orders_objs = TblOrder.objects.filter(user_id = user_id).order_by('-created_on').all()
+        orders_objs = TblOrder.objects.filter(user_id = int(user_id)).order_by('-created_on').all()
         
         for order in orders_objs:
             response = {
@@ -43,7 +43,9 @@ def order_history_logic(data):
                 "tracking_url"          : order.tracking_url,
                 "razorpay_order_id"     : order.razorpay_order_id,
                 "payment_status"        : order.payment_status,
-                "razorpay_payment_id"   : order.razorpay_payment_id
+                "razorpay_payment_id"   : order.razorpay_payment_id,
+                "taxed_price"           : float(order.taxed_price) if order.taxed_price else 0.0,
+                "gst_number"            : order.gst_number,
             }
             # if order.shipping_address:
             #     response['shipping'] = {
@@ -202,7 +204,9 @@ def order_place_logic(data):
                              created_on         = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')), 
                              updated_on         = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')), 
                              created_by         = data['user_id'],
-                             tracking_url       = None)
+                             tracking_url       = None,
+                             taxed_price        = data.get("tax_Price", 0),
+                             gst_number         = data.get("gst_number"))
         
         order_obj.save()
         
@@ -234,7 +238,9 @@ def order_place_logic(data):
                 "created_by"            : order_obj.created_by,
                 "updated_on"            : order_obj.updated_on.astimezone(gettz('Asia/Kolkata')) if order_obj.updated_on else '',
                 "updated_by"            : order_obj.updated_by,
-                "tracking_url"          : order_obj.tracking_url
+                "tracking_url"          : order_obj.tracking_url,
+                "taxed_price"           : float(order_obj.taxed_price) if order_obj.taxed_price else 0.0,
+                "gst_number"            : order_obj.gst_number,
             }
         # if order_obj.shipping_address:
         #     response['shipping'] = {
@@ -341,6 +347,8 @@ def order_details_logic(order_id):
         final_response['razorpay_order_id']     = order_object.razorpay_order_id
         final_response['payment_status']        = order_object.payment_status
         final_response['razorpay_payment_id']   = order_object.razorpay_payment_id
+        final_response['taxed_price']           = float(order_object.taxed_price) if order_object.taxed_price else 0.0
+        final_response['gst_number']            = order_object.gst_number
         
         return True, final_response, "Order placed successfully"
     
@@ -399,7 +407,9 @@ def order_status_update_logic(data):
                 "tracking_url"          : order_object.tracking_url,
                 "razorpay_order_id"     : order_object.razorpay_order_id,
                 "payment_status"        : order_object.payment_status,
-                "razorpay_payment_id"   : order_object.razorpay_payment_id
+                "razorpay_payment_id"   : order_object.razorpay_payment_id,
+                "taxed_price"           : float(order_object.taxed_price) if order_object.taxed_price else 0.0,
+                "gst_number"            : order_object.gst_number
             }
         # if order_object.shipping_address:
         #     response['shipping'] = {
@@ -497,7 +507,9 @@ def order_list_logic(data):
                 "tracking_url"          : orders_objs[flag].tracking_url,
                 "razorpay_order_id"     : orders_objs[flag].razorpay_order_id,
                 "payment_status"        : orders_objs[flag].payment_status,
-                "razorpay_payment_id"   : orders_objs[flag].razorpay_payment_id
+                "razorpay_payment_id"   : orders_objs[flag].razorpay_payment_id,
+                "taxed_price"           : float(orders_objs[flag].taxed_price) if orders_objs[flag].taxed_price else 0.0,
+                "gst_number"            : orders_objs[flag].gst_number
             }
             
             # if orders_objs[flag].shipping_address:
@@ -634,7 +646,9 @@ def order_search_logic(data):
                 "tracking_url"          : order_object.tracking_url,
                 "razorpay_order_id"     : order_object.razorpay_order_id,
                 "payment_status"        : order_object.payment_status,
-                "razorpay_payment_id"   : order_object.razorpay_payment_id
+                "razorpay_payment_id"   : order_object.razorpay_payment_id,
+                "taxed_price"           : float(order_object.taxed_price) if order_object.taxed_price else 0.0,
+                "gst_number"            : order_object.gst_number
             }
             
         # if order_object.shipping_address:
