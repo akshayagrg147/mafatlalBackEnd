@@ -6,8 +6,6 @@ class user_register_serializer(serializers.Serializer):
     password    = serializers.CharField()
     state       = serializers.CharField()  
     district    = serializers.CharField()  
-    pincode     = serializers.CharField()
-    gst         = serializers.CharField()
 
 class user_login_serializer(serializers.Serializer):
     email       = serializers.CharField(max_length = 255)

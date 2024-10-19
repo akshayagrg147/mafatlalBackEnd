@@ -16,15 +16,17 @@ def register_user(data):
         user_type_obj = None
         serializer = user_register_serializer(data=data)
         serializer.is_valid(raise_exception = True)
+        response_data = {}
         
         user_obj = TblUser.objects.filter(email = data['email']).first()
         if user_obj:
             return True, None, 'User already registered'
         
-        status, response_data, message = gst_number_verification(data['gst'], data['pincode'])
-        
-        if not status:
-            return True, None, 'GST number verification failed'
+        if data.get('gst'):
+            status, response_data, message = gst_number_verification(data['gst'], data.get('pincode'))
+            
+            if not status:
+                return True, None, 'GST number verification failed'
         
         salt_key = generate_salt_key()
         
@@ -38,14 +40,16 @@ def register_user(data):
                             full_name = data['name'],
                             password   = encoded_password,
                             salt_key   = salt_key,
-                            state      = data['state'],
-                            district   = data['district'],
-                            gst_number = data['gst'],
+                            state      = data.get('state'),
+                            district   = data.get('district'),
+                            gst_number = data.get('gst'),
                             user_type  = user_type_obj.type_number if user_type_obj else 0,
                             created_on  = datetime.now(timezone.utc).astimezone(gettz('Asia/Kolkata')),
                             created_by  = 'SYSTEM',
                             updated_on  = datetime.now(timezone.utc).astimezone(gettz('Asia/Kolkata')),
-                            updated_by= 'SYSTEM')
+                            updated_by  = 'SYSTEM')
+        if response_data:
+            user_obj.gst_information = json.dumps(response_data)
         user_obj.save()
         
         user_obj = TblUser.objects.filter(email=data['email']).first()
@@ -66,6 +70,7 @@ def register_user(data):
             "created_by"        : user_obj.created_by,
             "updated_by"        : user_obj.updated_by,
             "updated_on"        : user_obj.updated_on.astimezone(gettz('Asia/Kolkata')),
+            "gst_information"   : json.loads(user_obj.gst_information) if user_obj.gst_information else {},
         }
         if user_obj.shipping_address:
             response_obj['shipping'] = {
@@ -246,7 +251,7 @@ def gst_number_verification(gst_number, pncd):
         pincode = data['data']['pradr']['addr']['pncd']
         
         if pincode == pncd:
-            return True, {"message":"GST verified"}, 'success'
+            return True, data, 'success'
 
         else:
             return False, {}, 'GST not verified'

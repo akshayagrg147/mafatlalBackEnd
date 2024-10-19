@@ -17,6 +17,7 @@ class TblUser(models.Model):
     gst_number = models.CharField(max_length=100, blank=True, null=True)
     shipping_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='shipping_address', blank=True, null=True, related_name="shipping_address")
     billing_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='billing_address', blank=True, null=True, related_name="billing_address")
+    gst_information = models.CharField(max_length=5000, blank=True, null=True)
 
     class Meta:
         managed = False
