@@ -457,14 +457,14 @@ def update_orgs(data):
             if key == "name":
                 organization_obj.org_name = value
             if key == "state":
-                if value == "":
+                if value == -1:
                     organization_obj.state = None
                 else:
                     state_obj = TblState.objects.filter(id = value).first()
                     if state_obj:
                         organization_obj.state = state_obj
             if key == 'district':
-                if value == "":
+                if value == -1:
                     organization_obj.district = None
                 else:
                     district_obj = TblState.objects.filter(id = value).first()
@@ -781,7 +781,7 @@ def update_products(data):
                 product_object.price = value
                 
             elif key == "organization":
-                if value == "":
+                if value == -1:
                     product_object.organization = None
                 else:
                     org_object = TblOrganization.objects.filter(id=value).first()
@@ -792,7 +792,7 @@ def update_products(data):
                     product_object.district = org_object.district
                 
             elif key == "sub_category":
-                if value == "":
+                if value == -1:
                     product_object.product_sub_category = None
                 else:
                     sub_cat_object = TblSubcategories.objects.filter(id=value).first()
@@ -801,7 +801,7 @@ def update_products(data):
                     product_object.product_sub_category = sub_cat_object
                 
             elif key == "category":
-                if value == "":
+                if value == -1:
                     product_object.product_category = None
                 else:
                     cat_object = TblCategories.objects.filter(id=value).first()
@@ -810,7 +810,7 @@ def update_products(data):
                     product_object.product_category = cat_object
                 
             elif key == "state":
-                if value == "":
+                if value == -1:
                     product_object.state = None
                 else:
                     state_object = TblState.objects.filter(id=value).first()
@@ -819,7 +819,7 @@ def update_products(data):
                     product_object.state = state_object
                 
             elif key == "district":
-                if value == "":
+                if value == -1:
                     product_object.district = None
                 else:
                     district_object = TblDistrict.objects.filter(id=value).first()
