@@ -781,7 +781,7 @@ def update_products(data):
                 product_object.price = value
                 
             elif key == "organization":
-                if value == -1:
+                if value == "-1":
                     product_object.organization = None
                 else:
                     org_object = TblOrganization.objects.filter(id=value).first()
@@ -792,7 +792,7 @@ def update_products(data):
                     product_object.district = org_object.district
                 
             elif key == "sub_category":
-                if value == -1:
+                if value == "-1":
                     product_object.product_sub_category = None
                 else:
                     sub_cat_object = TblSubcategories.objects.filter(id=value).first()
@@ -801,7 +801,7 @@ def update_products(data):
                     product_object.product_sub_category = sub_cat_object
                 
             elif key == "category":
-                if value == -1:
+                if value == "-1":
                     product_object.product_category = None
                 else:
                     cat_object = TblCategories.objects.filter(id=value).first()
