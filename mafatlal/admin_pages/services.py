@@ -849,8 +849,8 @@ def update_products(data):
         response = {
                     "id"                    : product_object.id,
                     "name"                  : product_object.product_name,
-                    "organization_id"       : product_object.product_category_id if product_object.product_category else '',
-                    "organization_name"     : product_object.product_category.categories_name if product_object.product_category else '',
+                    "category_id"           : product_object.product_category_id if product_object.product_category else '',
+                    "category_name"         : product_object.product_category.categories_name if product_object.product_category else '',
                     "sub_category_id"       : product_object.product_sub_category_id if product_object.product_sub_category else '',
                     "sub_category_name"     : product_object.product_sub_category.subcategories_name if product_object.product_sub_category else '',
                     "product_organization_id"  : product_object.organization.id if product_object.organization else '',
