@@ -792,10 +792,13 @@ def update_products(data):
                     product_object.district = org_object.district
                 
             elif key == "sub_category":
-                sub_cat_object = TblSubcategories.objects.filter(id=value).first()
-                if not sub_cat_object:
-                    raise Exception("Sub-category not found")
-                product_object.product_sub_category = sub_cat_object
+                if value == "":
+                    product_object.product_sub_category = None
+                else:
+                    sub_cat_object = TblSubcategories.objects.filter(id=value).first()
+                    if not sub_cat_object:
+                        raise Exception("Sub-category not found")
+                    product_object.product_sub_category = sub_cat_object
                 
             elif key == "category":
                 if value == "":
