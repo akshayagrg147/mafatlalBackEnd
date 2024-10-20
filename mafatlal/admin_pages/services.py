@@ -457,13 +457,19 @@ def update_orgs(data):
             if key == "name":
                 organization_obj.org_name = value
             if key == "state":
-                state_obj = TblState.objects.filter(id = value).first()
-                if state_obj:
-                    organization_obj.state = state_obj
+                if value == "":
+                    organization_obj.state = None
+                else:
+                    state_obj = TblState.objects.filter(id = value).first()
+                    if state_obj:
+                        organization_obj.state = state_obj
             if key == 'district':
-                district_obj = TblState.objects.filter(id = value).first()
-                if district_obj:
-                    organization_obj.district = district_obj
+                if value == "":
+                    organization_obj.district = None
+                else:
+                    district_obj = TblState.objects.filter(id = value).first()
+                    if district_obj:
+                        organization_obj.district = district_obj
             if key == "image":
                 organization_obj.image = value
             if key == 'sub_id':
@@ -775,12 +781,15 @@ def update_products(data):
                 product_object.price = value
                 
             elif key == "organization":
-                org_object = TblOrganization.objects.filter(id=value).first()
-                if not org_object:
-                    raise Exception("Organization not found")
-                product_object.organization = org_object
-                product_object.state = org_object.state
-                product_object.district = org_object.district
+                if value == "":
+                    product_object.organization = None
+                else:
+                    org_object = TblOrganization.objects.filter(id=value).first()
+                    if not org_object:
+                        raise Exception("Organization not found")
+                    product_object.organization = org_object
+                    product_object.state = org_object.state
+                    product_object.district = org_object.district
                 
             elif key == "sub_category":
                 sub_cat_object = TblSubcategories.objects.filter(id=value).first()
@@ -789,22 +798,31 @@ def update_products(data):
                 product_object.product_sub_category = sub_cat_object
                 
             elif key == "category":
-                cat_object = TblCategories.objects.filter(id=value).first()
-                if not cat_object:
-                    raise Exception("category not found")
-                product_object.product_category = cat_object
+                if value == "":
+                    product_object.product_category = None
+                else:
+                    cat_object = TblCategories.objects.filter(id=value).first()
+                    if not cat_object:
+                        raise Exception("category not found")
+                    product_object.product_category = cat_object
                 
             elif key == "state":
-                state_object = TblState.objects.filter(id=value).first()
-                if not state_object:
-                    raise Exception("state_object not found")
-                product_object.state = state_object
+                if value == "":
+                    product_object.state = None
+                else:
+                    state_object = TblState.objects.filter(id=value).first()
+                    if not state_object:
+                        raise Exception("state_object not found")
+                    product_object.state = state_object
                 
             elif key == "district":
-                district_object = TblDistrict.objects.filter(id=value).first()
-                if not district_object:
-                    raise Exception("district_object not found")
-                product_object.district = district_object
+                if value == "":
+                    product_object.district = None
+                else:
+                    district_object = TblDistrict.objects.filter(id=value).first()
+                    if not district_object:
+                        raise Exception("district_object not found")
+                    product_object.district = district_object
                 
             elif key == "description":
                 product_object.description = value
