@@ -467,17 +467,18 @@ def order_list_logic(data):
             order_status = data['status'] if 'status' in data else None
             
             if order_status:
+                # Filter based on given order_status and ensure it’s not "Pending"
                 orders_objs = TblOrder.objects.filter(
                     created_on__gt=from_date,
                     created_on__lt=to_date,
-                    order_status = order_status
-                ).order_by('-created_on')
-                
+                    order_status=order_status
+                ).exclude(order_status="Pending").order_by('-created_on')
             else:
+                # Exclude "Pending" when no specific order_status is provided
                 orders_objs = TblOrder.objects.filter(
                     created_on__gt=from_date,
                     created_on__lt=to_date
-                ).order_by('-created_on')
+                ).exclude(order_status="Pending").order_by('-created_on')
             
         # if user_type is 0 then we show order of that user only
         else:
