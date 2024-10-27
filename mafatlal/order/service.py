@@ -342,7 +342,7 @@ def order_details_logic(order_id):
         final_response['products']              = product_details
         final_response['quantity']              = order_object.product_quantity
         final_response['order_status']          = order_object.order_status
-        final_response['order_placed']          = order_object.created_on
+        final_response['order_placed']          = order_object.created_on.astimezone(gettz('Asia/Kolkata')) if order_object.created_on else ''
         final_response['tracking_url']          = order_object.tracking_url
         final_response['razorpay_order_id']     = order_object.razorpay_order_id
         final_response['payment_status']        = order_object.payment_status
