@@ -11,5 +11,6 @@ urlpatterns = [
     path('product_info_list', views.product_info_list),
     path('address', views.address_operation),
     path('search', views.search_functionality),
-    path('photo_upload', views.upload_image)   
+    path('photo_upload', views.upload_image),   
+    path('start_stop', views.start_stop)   
 ]
