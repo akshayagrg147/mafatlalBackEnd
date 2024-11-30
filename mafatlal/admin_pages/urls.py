@@ -10,4 +10,6 @@ urlpatterns = [
     path('search_organization/', views.organization_search),
     path('search_sub_category/', views.sub_category_search),
     path('search_category/', views.category_search),
+    path('category_info/', views.Category_info),
+    path('product_info/', views.product_info)
 ]

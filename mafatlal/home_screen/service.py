@@ -128,7 +128,7 @@ def handle_product_info(cat_id = None):
         return []
     
     
-def product_info_logic(product_id):
+def product_info_logic(product_id, flag = None):
     try:
         final_response = {}
         
@@ -140,30 +140,31 @@ def product_info_logic(product_id):
         if product_obj:
             related_products_objs = TblProducts.objects.filter(product_sub_category_id = product_obj.product_sub_category_id).all()
             related_products = []
-            for objs in related_products_objs:
-                size_dict = objs.__dict__['size_available']
-                size_dict = json.dumps(size_dict)
-                product_category = TblCategories.objects.filter(id = int(objs.product_category_id)).first()
-                product_sub_category = TblSubcategories.objects.filter(id = int(objs.product_sub_category_id)).first()
-                images_list = ast.literal_eval(objs.__dict__['product_image'])
-                products_images = {}
-                for i in range(len(images_list)):
-                    products_images[f"image_{i+1}"] = images_list[i]
-                related_products.append({
-                    'id'                        : objs.id,
-                    'name'                      : objs.product_name,
-                    'product_category_id'       : product_category.id if product_category else "",
-                    'product_category'          : product_category.categories_name if product_category else "",
-                    'product_sub_category_id'   : product_sub_category.id if product_sub_category else "",
-                    'product_sub_category'      : product_sub_category.subcategories_name if product_sub_category else "",
-                    'product_organization_id'   : objs.organization.id if objs.organization else '',
-                    'product_organization'      : objs.organization.org_name if objs.organization else '',
-                    'size_available'            : json.loads(size_dict),
-                    'product_image'             : products_images,
-                    'price'                     : objs.price,
-                    'description'               : objs.description,
-                    "gst_percentage"            : objs.gst_percentage
-                })
+            if flag != 'internal':
+                for objs in related_products_objs:
+                    size_dict = objs.__dict__['size_available']
+                    size_dict = json.dumps(size_dict)
+                    product_category = TblCategories.objects.filter(id = int(objs.product_category_id)).first()
+                    product_sub_category = TblSubcategories.objects.filter(id = int(objs.product_sub_category_id)).first()
+                    images_list = ast.literal_eval(objs.__dict__['product_image'])
+                    products_images = {}
+                    for i in range(len(images_list)):
+                        products_images[f"image_{i+1}"] = images_list[i]
+                    related_products.append({
+                        'id'                        : objs.id,
+                        'name'                      : objs.product_name,
+                        'product_category_id'       : product_category.id if product_category else "",
+                        'product_category'          : product_category.categories_name if product_category else "",
+                        'product_sub_category_id'   : product_sub_category.id if product_sub_category else "",
+                        'product_sub_category'      : product_sub_category.subcategories_name if product_sub_category else "",
+                        'product_organization_id'   : objs.organization.id if objs.organization else '',
+                        'product_organization'      : objs.organization.org_name if objs.organization else '',
+                        'size_available'            : json.loads(size_dict),
+                        'product_image'             : products_images,
+                        'price'                     : objs.price,
+                        'description'               : objs.description,
+                        "gst_percentage"            : objs.gst_percentage
+                    })
             
             if product_obj:
                 size_dict = product_obj.__dict__['size_available']
@@ -174,17 +175,34 @@ def product_info_logic(product_id):
                     products_images[f"image_{i+1}"] = images_list[i]
                 product_category = TblCategories.objects.filter(id = int(product_obj.product_category_id)).first()
                 product_sub_category = TblSubcategories.objects.filter(id = int(product_obj.product_sub_category_id)).first()
-                final_response['id']                        = product_id
-                final_response['name']                      = product_obj.product_name
-                final_response['product_category']          = product_category.categories_name
-                final_response['product_sub_category']      = product_sub_category.subcategories_name
-                final_response['product_organization']      = product_obj.organization.org_name if product_obj.organization else ''
-                final_response['size_available']            = json.loads(size_dict)
-                final_response['product_image']             = products_images
-                final_response['price']                     = product_obj.price
-                final_response['description']               = product_obj.description
-                final_response['gst_percentage']            = product_obj.gst_percentage
-                final_response['related_products']          = related_products
+                
+                if flag != 'internal':
+                    final_response['id']                        = product_id
+                    final_response['name']                      = product_obj.product_name
+                    final_response['product_category']          = product_category.categories_name
+                    final_response['product_sub_category']      = product_sub_category.subcategories_name
+                    final_response['product_organization']      = product_obj.organization.org_name if product_obj.organization else ''
+                    final_response['size_available']            = json.loads(size_dict)
+                    final_response['product_image']             = products_images
+                    final_response['price']                     = product_obj.price
+                    final_response['description']               = product_obj.description
+                    final_response['gst_percentage']            = product_obj.gst_percentage
+                    final_response['related_products']          = related_products
+                
+                else:
+                    final_response['id']                        = int(product_id)
+                    final_response['name']                      = product_obj.product_name
+                    final_response['category_id']               = product_obj.product_category.id
+                    final_response['category_name']             = product_obj.product_category.categories_name
+                    final_response['sub_category_id']           = product_obj.product_sub_category.id
+                    final_response['sub_category_name']         = product_obj.product_sub_category.subcategories_name
+                    final_response['product_organization_id']   = product_obj.organization.id
+                    final_response['product_organization']      = product_obj.organization.org_name
+                    final_response['price']                     = product_obj.price
+                    final_response['description']               = product_obj.description
+                    final_response['product_image']             = products_images
+                    final_response['size_available']            = json.loads(size_dict)
+                    final_response['gst_percentage']            = product_obj.gst_percentage
             
         return 'Success', final_response, 'Product data fetched successfully'
             

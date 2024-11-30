@@ -33,6 +33,7 @@ INITIATED_CATEGORY_ADD              = "Initaited the category add api"
 INITIATED_CATEGORY_UPDATE           = "Initaited the category update api"
 INITIATED_CATEGORY_DELETE           = "Initaited the category delete api"
 INITAITED_CATEGORY_SEARCH_API       = "Initaited the category search api"
+INITAITED_CATEGORY_INFO_API         = "Initaited the category info api"
 
 INITIATED_PRODUCTS_FETCH            = "Initaited the products fetch api"
 INITIATED_PRODUCTS_ADD              = "Initaited the products add api"

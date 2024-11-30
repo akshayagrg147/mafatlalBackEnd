@@ -8,27 +8,37 @@ import ast
 from dateutil.tz import gettz
 
 # Categories Related Functions
-def get_category(user_id):
+def get_category(user_id = None, category_id = None):
     try:
-        final_response = []
-        if not user_id:
-            raise Exception("User is null")
-        
-        user_obj = TblUser.objects.filter(id = user_id).first()
-        if not user_obj:
-            raise Exception("User is not present")
-        
-        categories = TblCategories.objects.all()
-        
-        for cat_object in categories:
-            response = {
-                        "id"    : cat_object.id,
-                        "name"  : cat_object.categories_name,
-                        "image" : cat_object.image
+        if category_id:
+            categories = TblCategories.objects.filter(id = category_id).first()
+            final_response = {
+                        "id"    : categories.id,
+                        "name"  : categories.categories_name,
+                        "image" : categories.image,
+                        "sub_category" : get_sub_category({'user_id' : 15, 'category' : categories.id}, flag = 'internal')
                         }
             
-            final_response.append(response)
             
+        else:
+            final_response = []
+            if not user_id:
+                raise Exception("User is null")
+            
+            user_obj = TblUser.objects.filter(id = user_id).first()
+            if not user_obj:
+                raise Exception("User is not present")
+            
+            categories = TblCategories.objects.all()
+        
+            for cat_object in categories:
+                response = {
+                            "id"    : cat_object.id,
+                            "name"  : cat_object.categories_name,
+                            "image" : cat_object.image
+                            }
+                
+                final_response.append(response)
         
         return True, final_response, "Categories fetched successully"
         
@@ -165,7 +175,7 @@ def delete_category(data):
 
 
 # Sub_categories Related Functions
-def get_sub_category(data):
+def get_sub_category(data, flag = None):
     try:
         final_response = []
         user_id = data.get('user_id')
@@ -195,12 +205,15 @@ def get_sub_category(data):
             
             final_response.append(response)
             
-        
+        if flag == 'internal':
+            return final_response
         return True, final_response, "Sub_category fetched successully"
         
         
     except Exception as e:
         print(f"Error in fetching sub_category from database as {str(e)}")
+        if flag == 'internal':
+            return {}
         return False, {}, str(e)
 
 def add_sub_category(user_id, data):

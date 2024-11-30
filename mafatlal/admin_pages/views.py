@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
-from home_screen.service import home_screen_logic
+from home_screen.service import product_info_logic
 from .services import get_sub_category, add_sub_category, update_sub_category, delete_sub_category, get_products, add_products, update_products, delete_product, get_category, add_category, update_category, delete_category, get_orgs, add_orgs, update_orgs, delete_orgs, product_search_logic, organization_search_logic, sub_category_search_logic, category_search_logic
 import json
 
@@ -16,7 +16,7 @@ class Category(APIView):
         data = request.query_params
         user_id = data['user_id'] if 'user_id' in data else None
         
-        status, response_data, message = get_category(user_id)
+        status, response_data, message = get_category(user_id=user_id)
         
         return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
     
@@ -252,6 +252,32 @@ def category_search(request):
     data = request.query_params
     
     status, response_data, message = category_search_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def Category_info(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_CATEGORY_SEARCH_API)
+    
+    data = request.query_params
+    
+    category_id = data.get('category_id')
+    
+    status, response_data, message = get_category(category_id=category_id)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def product_info(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_PRODUCT_INFO_API)
+    
+    data = request.query_params
+    
+    product_id = data.get('id')
+    
+    status, response_data, message = product_info_logic(product_id = product_id, flag = 'internal')
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
         
