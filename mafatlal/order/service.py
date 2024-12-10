@@ -905,10 +905,11 @@ def admin_order_list_logic(data):
             })  
             
         response = {
-            "placed_orders"         : placed,
-            "dispatched_orders"     : dispatched,
-            "delievered_orders"     : delievered,
-            "returned_orders"       : returned,
+            "Placed"         : placed,
+            "Dispatched"     : dispatched,
+            "Delievered"     : delievered,
+            "Returned"       : returned,
+            "Pending"        : pending,
             "total_revenue"         : total_revenue,
             "total_customers"       : total_customers,
             "total_products"        : total_products,
@@ -1118,6 +1119,104 @@ def order_status_wise_data_logic(data):
     except Exception as e:
         print(f"Error at order_status_wise_data_logic api: {str(e)}")
         return False, None, str(e)
+
+
+def order_by_status_data_logic(data):
+    try:
+        user_id = data['user_id'] if 'user_id' in data else None
+        if not user_id:
+            print("User can't be none")
+            raise ValueError("User can't be none")
+        
+        user_obj = TblUser.objects.filter(id = user_id).first()
+        if not user_obj:
+            raise ValueError("No user found")
+        
+        order_status = data['status'] if 'status' in data else None
+        category_id = data.get('category_id')
+        sub_category_id = data.get('sub_category_id')
+        organization_id = data.get('organization_id')
+        
+        from_date = data.get('from')
+        to_date = data.get('to')
+        
+        query = Q()
+        if from_date and to_date:
+            query = Q(created_on__gt=from_date) & Q(created_on__lt=to_date)
+
+        if order_status:
+            query &= Q(order_status=order_status)
+
+        if category_id:
+            category_obj = TblCategories.objects.filter(id=category_id).first()
+            if category_obj:
+                category_name = category_obj.categories_name
+                query &= Q(order_details__icontains=category_name) | Q(order_details__icontains=str(category_id))
+
+        if sub_category_id:
+            sub_category_obj = TblSubcategories.objects.filter(id=sub_category_id).first()
+            if sub_category_obj:
+                sub_category_name = sub_category_obj.subcategories_name
+                query &= Q(order_details__icontains=sub_category_name) | Q(order_details__icontains=str(sub_category_id))
+
+        if organization_id:
+            organization_obj = TblOrganization.objects.filter(id=organization_id).first()
+            if organization_obj:
+                organization_name = organization_obj.org_name
+                query &= Q(order_details__icontains=organization_name) | Q(order_details__icontains=str(organization_id))
+        
+        if query:
+            orders_objs = TblOrder.objects.filter(query).order_by('-created_on')
+        
+        else:
+            orders_objs = TblOrder.objects.all().order_by('-created_on')
+            
+        
+        
+        # Get all the products status details 
+        placed = 0
+        dispatched = 0
+        delievered = 0
+        returned = 0
+        pending = 0
+        
+        for orders in orders_objs:
+            if orders.order_status == 'Pending':
+                pending +=1 
+            
+            elif orders.order_status == 'Placed':
+                placed +=1 
+                
+            elif orders.order_status == 'Dispatched':
+                dispatched +=1 
+                
+            elif orders.order_status == 'Delievered':
+                delievered +=1 
+                
+            elif orders.order_status == 'Returned':
+                returned +=1 
+                
+        response = {
+            "Placed"         : placed,
+            "Dispatched"     : dispatched,
+            "Delievered"     : delievered,
+            "Returned"       : returned,
+            "Pending"        : pending,
+        }
+        
+        return True, response, "Order status fetch successfully"
+        
+    
+    except ValueError as ve:
+        print(f"Error at order_by_status_data_logic api: {str(ve)}")
+        return False, None, str(ve)
+    
+    except Exception as e:
+        print(f"Error at order_by_status_data_logic api: {str(e)}")
+        return False, None, str(e)
+
+
+
 
 
 

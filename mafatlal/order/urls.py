@@ -13,4 +13,5 @@ urlpatterns = [
     path('admin_orders_details', views.admin_orders_details),
     path('sales_overview', views.sales_overview_logic),
     path('order_status_wise', views.order_status_wise_logic),
+    path('order_by_status', views.order_by_status_logic),
 ]
