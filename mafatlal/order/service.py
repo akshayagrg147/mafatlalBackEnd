@@ -11,6 +11,7 @@ from razorpay.errors import SignatureVerificationError
 from config import razor_pay_config
 from django.db.models import Q
 from mafatlal.constants import month_mapping
+from collections import defaultdict
 
 client = razorpay.Client(auth=(razor_pay_config['RAZOR_PAY_KEY'], razor_pay_config['RAZOR_PAY_SECRET']))
 
@@ -1015,6 +1016,98 @@ def get_week_date_range(year, month, week):
         end_date = datetime.datetime(year, month + 1, 1) - datetime.timedelta(days=1)
     
     return start_date.date(), end_date.date()
+
+
+def order_status_wise_data_logic(data):
+    try:
+        user_id = data['user_id'] if 'user_id' in data else None
+        if not user_id:
+            print("User can't be none")
+            raise ValueError("User can't be none")
+        
+        user_obj = TblUser.objects.filter(id = user_id).first()
+        if not user_obj:
+            raise ValueError("No user found")
+        
+        order_status = data['status'] if 'status' in data else None
+        category_id = data.get('category_id')
+        sub_category_id = data.get('sub_category_id')
+        organization_id = data.get('organization_id')
+        flag = data.get('flag')
+        
+        query = Q()
+
+        # Add the order status filter if it exists
+        if order_status:
+            query &= Q(order_status=order_status)
+
+        # Add category-related filters
+        if category_id:
+            category_obj = TblCategories.objects.filter(id=category_id).first()
+            if category_obj:
+                category_name = category_obj.categories_name
+                query &= Q(order_details__icontains=category_name) | Q(order_details__icontains=str(category_id))
+
+        # Add sub-category-related filters
+        if sub_category_id:
+            sub_category_obj = TblSubcategories.objects.filter(id=sub_category_id).first()
+            if sub_category_obj:
+                sub_category_name = sub_category_obj.subcategories_name
+                query &= Q(order_details__icontains=sub_category_name) | Q(order_details__icontains=str(sub_category_id))
+
+        # Add organization-related filters
+        if organization_id:
+            organization_obj = TblOrganization.objects.filter(id=organization_id).first()
+            if organization_obj:
+                organization_name = organization_obj.org_name
+                query &= Q(order_details__icontains=organization_name) | Q(order_details__icontains=str(organization_id))
+                
+        if flag == "monthly":
+            year    = data.get('year')
+            query &= Q(created_on__year=year)
+        
+        if query:
+            orders_objs = TblOrder.objects.filter(query).order_by('-created_on')
+        
+        else:
+            orders_objs = TblOrder.objects.all().order_by('-created_on')
+        
+        # Get all the products status details 
+        status_map = {"Placed" : 0, "Dispatched" : 0, "Delievered" : 0, "Returned" : 0, "Pending" : 0}
+        
+        statistics = defaultdict(lambda: defaultdict(int))
+
+        for order in orders_objs:
+            if not order.created_on:
+                continue  # Skip orders without a valid creation date
+
+            # Determine the date key based on the flag
+            if flag == "monthly":
+                date_key = month_mapping.get(order.created_on.month, '')
+            elif flag == "yearly":
+                date_key = order.created_on.year
+            else:
+                continue  # Skip if the flag is not recognized
+
+            if order_status:
+                statistics[date_key][order_status] += 1 if order.order_status == order_status else 0   
+            
+            else:
+                statistics[date_key]['Placed'] += 1 if order.order_status == 'Placed' else 0
+                statistics[date_key]['Dispatched'] += 1 if order.order_status == 'Dispatched' else 0
+                statistics[date_key]['Delievered'] += 1 if order.order_status == 'Delievered' else 0
+                statistics[date_key]['Returned'] += 1 if order.order_status == 'Returned' else 0
+                statistics[date_key]['Pending'] += 1 if order.order_status == 'Pending' else 0
+        
+        return True, statistics, "Order stats fetched successfully"
+    
+    except ValueError as ve:
+        print(f"Error at order_status_wise_data_logic api: {str(ve)}")
+        return False, None, str(ve)
+    
+    except Exception as e:
+        print(f"Error at order_status_wise_data_logic api: {str(e)}")
+        return False, None, str(e)
 
 
 
