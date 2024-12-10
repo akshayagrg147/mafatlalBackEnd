@@ -1039,7 +1039,13 @@ def order_status_wise_data_logic(data):
 
         # Add the order status filter if it exists
         if order_status:
-            query &= Q(order_status=order_status)
+            if ',' in order_status:
+                order_status = order_status.split(',')
+                
+            if isinstance(order_status, (list, tuple)):
+                query &= Q(order_status__in=order_status)  
+            else:
+                query &= Q(order_status=order_status)
 
         # Add category-related filters
         if category_id:
@@ -1090,7 +1096,11 @@ def order_status_wise_data_logic(data):
                 continue  # Skip if the flag is not recognized
 
             if order_status:
-                statistics[date_key][order_status] += 1 if order.order_status == order_status else 0   
+                if isinstance(order_status, list):
+                    for status in order_status:
+                        statistics[date_key][status] += 1 if order.order_status == status else 0 
+                else:
+                     statistics[date_key][order_status] += 1 if order.order_status == order_status else 0 
             
             else:
                 statistics[date_key]['Placed'] += 1 if order.order_status == 'Placed' else 0
