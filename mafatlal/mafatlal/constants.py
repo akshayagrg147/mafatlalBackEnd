@@ -12,6 +12,7 @@ INITAITED_PLACE_LIST_API            = "Initaited the place list api"
 INITAITED_ORDER_STATS_API           = "Initaited the order stats api"
 INITAITED_ORDER_SEARCH_API          = "Initaited the order search api"
 INITAITED_ADMIN_ORDER_LIST_API      = "Initaited the admin order list api"
+INITAITED_SALES_OVERVIEW_API        = "Initaited the sales overview api"
 INITAITED_VERIFY_PAYMENT_API        = "Initaited the payment verify api"
 
 INITAITED_ADDRESS_UPDATE_API        = "Initaited Address update api"
@@ -48,3 +49,20 @@ INITIATED_UPLOAD_IMAGES             = "Initaited the upload images api"
 INITIATED_GET_VERIFICATION          = "Initaited the gst verification api"
 
 ERROR_MESSAGE                       = "Invalid_Request"
+
+
+
+month_mapping = {
+                    1   : "Jan",
+                    2   : "Feb",
+                    3   : "Mar",
+                    4   : "Apr",
+                    5   : "May",
+                    6   : "Jun",
+                    7   : "Jul",
+                    8   : "Aug",
+                    9   : "Sep",
+                    10  : "Oct",
+                    11  : "Nov",
+                    12  : "Dec",
+                }

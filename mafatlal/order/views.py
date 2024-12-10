@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
-from order.service import order_history_logic, order_place_logic, order_details_logic, order_status_update_logic, order_list_logic, order_stats_logic, order_search_logic, verify_payment_logic, admin_order_list_logic
+from order.service import order_history_logic, order_place_logic, order_details_logic, order_status_update_logic, order_list_logic, order_stats_logic, order_search_logic, verify_payment_logic, admin_order_list_logic, sales_overview_data_logic
 
 # Create your views here.
 @api_view(['GET'])
@@ -102,6 +102,17 @@ def admin_orders_details(request):
     data = request.query_params
     
     status, response_data, message = admin_order_list_logic(data)
+    
+    return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+
+@api_view(['GET'])
+def sales_overview_logic(request):
+    print(constants.BREAKCODE)
+    print(constants.INITAITED_SALES_OVERVIEW_API)
+    
+    data = request.query_params
+    
+    status, response_data, message = sales_overview_data_logic(data)
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
     

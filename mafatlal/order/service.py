@@ -10,6 +10,7 @@ import razorpay
 from razorpay.errors import SignatureVerificationError
 from config import razor_pay_config
 from django.db.models import Q
+from mafatlal.constants import month_mapping
 
 client = razorpay.Client(auth=(razor_pay_config['RAZOR_PAY_KEY'], razor_pay_config['RAZOR_PAY_SECRET']))
 
@@ -610,7 +611,7 @@ def order_stats_logic(data):
         if order_status:
             filter_args['order_status'] = order_status
         
-            order_objs = TblOrder.objects.filter(**filter_args).all()
+        order_objs = TblOrder.objects.filter(**filter_args).all()
 
         statistics = {}
         for order in order_objs:
@@ -924,5 +925,96 @@ def admin_order_list_logic(data):
     except Exception as e:
         print(f"Error at order list api {str(e)}")
         return False,  None, str(e)
+
+
+def sales_overview_data_logic(data):
+    try:
+        final_response = {}
+        total_profit = 0.0
+        total_sale = 0.0
+
+        user_id = data.get('user_id')
+        if not user_id:
+            raise ValueError("User can't be none")
+        
+        flag = data.get('flag')
+        if flag == "weekly":
+            week    = int(data.get('week'))
+            month   = int(data.get('month'))
+            year    = int(data.get('year'))
+            start_date, end_date = get_week_date_range(year, month, week)
+            order_objs = TblOrder.objects.filter(created_on__date__range=(start_date, end_date))
+            
+            
+        elif flag == "monthly":
+            year    = data.get('year')
+            order_objs = TblOrder.objects.filter(created_on__year=year).all()
+            
+        elif flag == "yearly":
+            order_objs = TblOrder.objects.all()
+        
+        user_obj = TblUser.objects.filter(id=user_id).first()
+        if not user_obj:
+            raise ValueError("No user found")
+
+        statistics = {}
+        for order in order_objs:
+            if flag == "weekly":
+                date_key = order.created_on.astimezone(gettz('Asia/Kolkata')).strftime("%Y-%m-%d") if order.created_on else ''
+            
+            elif flag == "monthly":
+                date_key = order.created_on.month if order.created_on else ''
+                date_key = month_mapping[date_key]
+                
+                
+            elif flag == "yearly":
+                date_key = order.created_on.year if order.created_on else ''
+            
+                            
+            total_profit += float(order.price)
+            
+            if date_key not in statistics:
+                statistics[date_key] = 0.0
+            
+            statistics[date_key] += float(order.price)
+            
+        
+        total_sale = len(order_objs)
+        total_profit = total_profit
+            
+        # Prepare the final response
+        final_response = {
+            "Total Sale"    : total_sale,
+            "Total Profit"  : total_profit,
+            "statistics"    : statistics
+        }
+        
+        return True, final_response, "Order stats fetched successfully"
+    
+    except ValueError as ve:
+        print(f"Error at order stats api: {str(ve)}")
+        return False, None, str(ve)
+    
+    except Exception as e:
+        print(f"Error at order stats api: {str(e)}")
+        return False, None, str(e)
+
+def get_week_date_range(year, month, week):
+    first_day_of_month = datetime.datetime(year, month, 1)
+    first_day_weekday = first_day_of_month.weekday()
+    
+    # Calculate the start of the first week (offset if the month starts mid-week)
+    start_date = first_day_of_month - datetime.timedelta(days=first_day_weekday)
+    start_date += datetime.timedelta(weeks=week - 1)
+    
+    # Calculate the end date of the week
+    end_date = start_date + datetime.timedelta(days=6)
+    
+    # Ensure the end_date does not exceed the month
+    if end_date.month != month:
+        end_date = datetime.datetime(year, month + 1, 1) - datetime.timedelta(days=1)
+    
+    return start_date.date(), end_date.date()
+
 
 

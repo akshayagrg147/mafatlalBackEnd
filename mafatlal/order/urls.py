@@ -11,5 +11,5 @@ urlpatterns = [
     path('search_order', views.order_search),
     path('verify_payment', views.verify_payment),
     path('admin_orders_details', views.admin_orders_details),
-    
+    path('sales_overview', views.sales_overview_logic)
 ]
