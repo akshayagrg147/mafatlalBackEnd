@@ -1,7 +1,8 @@
-from .models import TblCategories, TblSubcategories, TblProducts, TblOrganization, TblState, TblDistrict
+from .models import TblCategories, TblSubcategories, TblProducts, TblOrganization, TblState, TblDistrict, TblSubAdmin
 from mafatlal.api_serializer import add_products_serializer
 import datetime
 from login.models import TblUser
+from login.service import register_user
 import json
 from django.db.models import Q
 import ast
@@ -1092,7 +1093,173 @@ def category_search_logic(data):
         return False, {}, str(e)
  
 
- 
+def get_sub_admin_list(data):
+    try:
+        final_response = []
+        user_id = data.get('user_id')
+        if not user_id:
+            raise Exception("User is null")
+        
+        user_obj = TblUser.objects.filter(id = user_id).first()
+        if not user_obj:
+            raise Exception("User is not present")
+        
+        
+        sub_admins_objs = TblSubAdmin.objects.all()
+        for sub_admins in sub_admins_objs:
+            response = {
+                        "id"                    : sub_admins.user.id,
+                        "name"                  : sub_admins.user.full_name,
+                        "email"                 : sub_admins.user.email,
+                        "mobile"                : sub_admins.mobile,
+                        "roles"                 : str(sub_admins.role).split(","),
+                        "category"              : {},
+                        "sub_category"          : {},
+                        "organization"          : {}
+                        }
+            
+            for cat in str(sub_admins.category).split(','):
+                category_obj = TblCategories.objects.filter(id = cat).first()
+                response['category'][cat] = category_obj.categories_name if category_obj else ""
+                
+            for sub_cat in str(sub_admins.sub_category).split(','):
+                sub_category_obj = TblSubcategories.objects.filter(id = sub_cat).first()
+                response['sub_category'][sub_cat] = sub_category_obj.subcategories_name if sub_category_obj else ""
+                
+            for org in str(sub_admins.organization).split(','):
+                org_obj = TblOrganization.objects.filter(id = org).first()
+                response['organization'][org] = org_obj.org_name if org_obj else ""
+            
+            final_response.append(response)
+            
+        return True, final_response, "Sub Admins fetched successully"
+        
+        
+    except Exception as e:
+        print(f"Error in fetching Sub_admins from database as {str(e)}")
+        return False, {}, str(e)
+    
+    
+def create_sub_admin(user_id, data):
+    try:
+        if not user_id:
+            raise Exception("User is null")
+        
+        user_obj = TblUser.objects.filter(id = user_id).first()
+        if not user_obj:
+            raise Exception("User is not present")
+                           
+        name            = data.get("name")                 
+        email           = data.get("email")
+        mobile          = data.get("mobile")                
+        roles           = data.get("roles")
+        category        = data.get("category")
+        sub_category    = data.get("sub_category")
+        organization    = data.get("organization")
+        state           = data.get("state")
+        district        = data.get("district")
+        
+        user_obj = TblUser.objects.filter(email = email).first()
+        
+        if not user_obj:
+            user_obj = register_user({ 
+                            "email"     : email,
+                            "name"      : name,
+                            "password"  : "subadmin@123",
+                            "type"      : "subadmin"
+                            }, flag='internal')
+            # user_obj = TblUser(email = email ,
+            #                    full_name = name ,
+            #                    password = "subadmin@123", 
+            #                    user_type = 1, 
+            #                    created_on  = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
+            #                     created_by  = 'SYSTEM',
+            #                     updated_on  = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
+            #                     updated_by  = 'SYSTEM')
+            # user_obj.save()
+        
+        sub_admin_obj = TblSubAdmin.objects.filter(user_id = user_obj.id).first()
+        if not sub_admin_obj:
+            sub_admin_obj = TblSubAdmin(user = user_obj, 
+                                        role = ",".join(roles), 
+                                        state = state, 
+                                        district = district, 
+                                        category = ",".join(category), 
+                                        sub_category = ",".join(sub_category), 
+                                        organization = ",".join(organization), 
+                                        mobile = mobile,
+                                        created_on  = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
+                                        created_by  = 'SYSTEM',
+                                        updated_on  = datetime.datetime.now(datetime.timezone.utc).astimezone(gettz('Asia/Kolkata')),
+                                        updated_by  = 'SYSTEM')
+            
+            sub_admin_obj.save()
+            
+        else:
+            old_role = str(sub_admin_obj.role).split(",")
+            if roles:
+                for role in roles.split(','):
+                    if role not in old_role:
+                        old_role.append(role)
+                
+                sub_admin_obj.role = ",".join(old_role)
+                        
+            old_category = str(sub_admin_obj.category).split(",")
+            if category:
+                for categ in category.split(','):
+                    if categ not in old_category:
+                        old_category.append(categ)
+                
+                sub_admin_obj.category = ",".join(old_category)
+                        
+            old_sub_category = str(sub_admin_obj.sub_category).split(",")
+            if sub_category:
+                for sub_cate in sub_category.split(','):
+                    if sub_cate not in old_sub_category:
+                        old_sub_category.append(sub_cate)
+                
+                sub_admin_obj.sub_category = ",".join(old_sub_category)
+                        
+            old_organization = str(sub_admin_obj.organization).split(",")
+            if organization:
+                for orgs in organization.split(','):
+                    if orgs not in old_organization:
+                        old_organization.append(orgs)
+                        
+                sub_admin_obj.organization = ",".join(old_organization)
+                
+            sub_admin_obj.save()
+            
+        response = {
+                    "id"                    : sub_admin_obj.user.id,
+                    "name"                  : sub_admin_obj.user.full_name,
+                    "email"                 : sub_admin_obj.user.email,
+                    "mobile"                : sub_admin_obj.mobile,
+                    "roles"                 : str(sub_admin_obj.role).split(","),
+                    "category"              : {},
+                    "sub_category"          : {},
+                    "organization"          : {}
+                    }
+        
+        for cat in str(sub_admin_obj.category).split(','):
+            category_obj = TblCategories.objects.filter(id = cat).first()
+            response['category'][cat] = category_obj.categories_name if category_obj else ""
+            
+        for sub_cat in str(sub_admin_obj.sub_category).split(','):
+            sub_category_obj = TblSubcategories.objects.filter(id = sub_cat).first()
+            response['sub_category'][sub_cat] = sub_category_obj.subcategories_name if sub_category_obj else ""
+            
+        for org in str(sub_admin_obj.organization).split(','):
+            org_obj = TblOrganization.objects.filter(id = org).first()
+            response['organization'][org] = org_obj.org_name if org_obj else ""
+        
+            
+        return True, response, "Sub Admins Created successully"
+        
+        
+    except Exception as e:
+        print(f"Error in creation Sub_admins from database as {str(e)}")
+        return False, {}, str(e)
 
 
  

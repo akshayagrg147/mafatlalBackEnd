@@ -11,5 +11,6 @@ urlpatterns = [
     path('search_sub_category/', views.sub_category_search),
     path('search_category/', views.category_search),
     path('category_info/', views.Category_info),
-    path('product_info/', views.product_info)
+    path('product_info/', views.product_info),
+    path('sub_admin/', views.Sub_admin.as_view())
 ]

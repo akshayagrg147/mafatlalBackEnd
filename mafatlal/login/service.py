@@ -1,4 +1,5 @@
 from .models import TblUser, TblUserType
+from admin_pages.models import TblSubAdmin
 import hashlib
 import hmac
 from mafatlal.api_serializer import user_login_serializer, user_register_serializer
@@ -11,7 +12,7 @@ import json
 import requests
 from dateutil.tz import gettz
 
-def register_user(data):
+def register_user(data, flag = None):
     try:
         user_type_obj = None
         serializer = user_register_serializer(data=data)
@@ -32,7 +33,7 @@ def register_user(data):
         
         encoded_password = hmac.new(salt_key.encode(), data['password'].encode(), hashlib.sha512).hexdigest()
         
-        user_type = data['type'].lowercase() if 'type' in data else 'retailer'
+        user_type = data['type'].lower() if 'type' in data else 'retailer'
         if user_type:
             user_type_obj = TblUserType.objects.filter(type_name = user_type.lower()).first()
         
@@ -52,6 +53,8 @@ def register_user(data):
             user_obj.gst_information = json.dumps(response_data)
         user_obj.save()
         
+        if flag == 'internal':
+            return user_obj
         user_obj = TblUser.objects.filter(email=data['email']).first()
         
         response_obj = {
@@ -138,6 +141,17 @@ def login_check(data):
                 "updated_by"        : user_obj.updated_by,
                 "updated_on"        : user_obj.updated_on.astimezone(gettz('Asia/Kolkata')),
             }
+            
+            if user_obj.user_type == 1:
+                sub_admin_obj = TblSubAdmin.objects.filter(user = user_obj.id).first()
+                if sub_admin_obj:
+                    response_obj['role']            = str(sub_admin_obj.role).split(',')
+                    response_obj['state']           = sub_admin_obj.state
+                    response_obj['district']        = sub_admin_obj.district
+                    response_obj['category']        = str(sub_admin_obj.category).split(',')
+                    response_obj['sub_category']    = str(sub_admin_obj.sub_category).split(',')
+                    response_obj['organization']    = str(sub_admin_obj.organization).split(',')
+                    response_obj['mobile']          = sub_admin_obj.mobile
             
             if user_obj.shipping_address:
                 response_obj['shipping'] = {

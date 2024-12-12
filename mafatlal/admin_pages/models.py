@@ -1,4 +1,6 @@
 from django.db import models
+from home_screen.models import TblAddress
+from login.models import TblUser
 
 
 class TblState(models.Model):
@@ -75,6 +77,26 @@ class TblProducts(models.Model):
         managed = False
         db_table = 'tbl_products'
         
+class TblSubAdmin(models.Model):
+    user = models.ForeignKey(TblUser, models.DO_NOTHING)
+    role = models.CharField(max_length=500, blank=True, null=True)
+    state = models.CharField(max_length=30, blank=True, null=True)
+    district = models.CharField(max_length=30, blank=True, null=True)
+    category = models.CharField(max_length=500, blank=True, null=True)
+    sub_category = models.CharField(max_length=500, blank=True, null=True)
+    organization = models.CharField(max_length=500, blank=True, null=True)
+    gst_number = models.CharField(max_length=100, blank=True, null=True)
+    shipping_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='shipping_address', blank=True, null=True, related_name='ship')
+    gst_information = models.CharField(max_length=500, blank=True, null=True)
+    billing_address = models.ForeignKey(TblAddress, models.DO_NOTHING, db_column='billing_address', blank=True, null=True, related_name='bill')
+    created_on = models.DateTimeField()
+    created_by = models.CharField(max_length=50)
+    updated_on = models.DateTimeField()
+    updated_by = models.CharField(max_length=50)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
 
+    class Meta:
+        managed = False
+        db_table = 'tbl_sub_admin'
         
         

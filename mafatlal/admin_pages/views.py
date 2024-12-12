@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from mafatlal.response import JsendSuccessResponse
 from mafatlal import constants
 from home_screen.service import product_info_logic
-from .services import get_sub_category, add_sub_category, update_sub_category, delete_sub_category, get_products, add_products, update_products, delete_product, get_category, add_category, update_category, delete_category, get_orgs, add_orgs, update_orgs, delete_orgs, product_search_logic, organization_search_logic, sub_category_search_logic, category_search_logic
+from .services import get_sub_category, add_sub_category, update_sub_category, delete_sub_category, get_products, add_products, update_products, delete_product, get_category, add_category, update_category, delete_category, get_orgs, add_orgs, update_orgs, delete_orgs, product_search_logic, organization_search_logic, sub_category_search_logic, category_search_logic, get_sub_admin_list, create_sub_admin
 import json
 
 
@@ -281,6 +281,54 @@ def product_info(request):
     
     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
         
+
+class Sub_admin(APIView):
+    def get(self, request, *args, **kwargs):
+        print(constants.BREAKCODE)
+        print(constants.INITIATED_PRODUCTS_FETCH)
+        
+        data = request.query_params
+        
+        status, response_data, message = get_sub_admin_list(data)
+        
+        return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+    
+    def post(self, request, *args, **kwargs):
+        print(constants.BREAKCODE)
+        print(constants.INITIATED_PRODUCTS_ADD)
+        
+        data = request.body
+        
+        data = json.loads(data)
+        
+        user_id = data.get('user_id')
+        sub_admin_object = data['data']
+                
+        status, response_data, message = create_sub_admin(user_id, sub_admin_object)
+        
+        return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+    
+    # def patch(self, request, *args, **kwargs):
+    #     print(constants.BREAKCODE)
+    #     print(constants.INITIATED_PRODUCTS_UPDATE)
+        
+    #     data = request.body
+        
+    #     data = json.loads(data)
+                
+    #     status, response_data, message = update_products(data)
+        
+    #     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
+    
+    # def delete(self, request, *args, **kwargs):
+    #     print(constants.BREAKCODE)
+    #     print(constants.INITIATED_PRODUCTS_DELETE)
+        
+    #     data = request.body
+        
+    #     data = json.loads(data)
+                
+    #     status, response_data, message = delete_product(data)
+        
+    #     return JsendSuccessResponse(status = status,data = response_data, message=message).get_response()
  
- 
-      
