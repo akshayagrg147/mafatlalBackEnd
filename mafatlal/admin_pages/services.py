@@ -1117,18 +1117,20 @@ def get_sub_admin_list(data):
                         "sub_category"          : {},
                         "organization"          : {}
                         }
-            
             for cat in str(sub_admins.category).split(','):
-                category_obj = TblCategories.objects.filter(id = cat).first()
-                response['category'][cat] = category_obj.categories_name if category_obj else ""
-                
+                if cat:
+                    category_obj = TblCategories.objects.filter(id = cat).first()
+                    response['category'][cat] = category_obj.categories_name if category_obj else ""
+            
             for sub_cat in str(sub_admins.sub_category).split(','):
-                sub_category_obj = TblSubcategories.objects.filter(id = sub_cat).first()
-                response['sub_category'][sub_cat] = sub_category_obj.subcategories_name if sub_category_obj else ""
+                if sub_cat:
+                    sub_category_obj = TblSubcategories.objects.filter(id = sub_cat).first()
+                    response['sub_category'][sub_cat] = sub_category_obj.subcategories_name if sub_category_obj else ""
                 
             for org in str(sub_admins.organization).split(','):
-                org_obj = TblOrganization.objects.filter(id = org).first()
-                response['organization'][org] = org_obj.org_name if org_obj else ""
+                if org:
+                    org_obj = TblOrganization.objects.filter(id = org).first()
+                    response['organization'][org] = org_obj.org_name if org_obj else ""
             
             final_response.append(response)
             
